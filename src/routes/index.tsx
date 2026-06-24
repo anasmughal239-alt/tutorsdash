@@ -1,239 +1,383 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Users, CalendarDays, FolderOpen, TrendingUp, CheckSquare, ClipboardList, ArrowRight, Sparkles } from "lucide-react";
+import { Users, CalendarDays, FolderOpen, TrendingUp, CheckSquare, ClipboardList, ArrowRight, Sparkles, BookOpen, LayoutDashboard } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
-const features = [
-  { icon: Users,        title: "Student Management", desc: "Every student's details, modules, and history in one profile. Nothing lost." },
-  { icon: CalendarDays, title: "Lesson Scheduling",  desc: "Plan lessons with dates, topics, and notes. See your full week at a glance." },
-  { icon: CheckSquare,  title: "Attendance Tracking",desc: "Mark present or absent in a tap. Monthly rates calculated automatically." },
-  { icon: ClipboardList,title: "Assignments",        desc: "Assign tasks, track submissions, and know exactly who's behind." },
-  { icon: TrendingUp,   title: "Progress Reports",   desc: "Auto-generated reports with grades, attendance %, and completion rates." },
-  { icon: FolderOpen,   title: "Materials Upload",   desc: "Organise PDFs by module. Students access files from their own portal link." },
-];
-
-const mockStudents = [
-  { name: "Ali Hassan",   module: "IELTS Speaking", status: "Active",  dot: "#22C55E", bg: "#F0FDF4", tx: "#16A34A" },
-  { name: "Fatima Malik", module: "Sociology",      status: "Active",  dot: "#22C55E", bg: "#F0FDF4", tx: "#16A34A" },
-  { name: "Ahmed Raza",   module: "IELTS Writing",  status: "Pending", dot: "#F59E0B", bg: "#FFFBEB", tx: "#D97706" },
-  { name: "Sara Khan",    module: "Math Grade 9",   status: "Active",  dot: "#22C55E", bg: "#F0FDF4", tx: "#16A34A" },
-];
-
 function LandingPage() {
   return (
     <>
       <style>{`
-        .td { font-family: 'Instrument Sans', system-ui, sans-serif; background: #fff; color: #0F172A; min-height: 100vh; -webkit-font-smoothing: antialiased; }
-        .td *, .td *::before, .td *::after { box-sizing: border-box; }
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap');
 
-        /* ── Nav ── */
-        .td-nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid #E2E8F0; }
-        .td-nav-in { max-width: 1140px; margin: 0 auto; padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
-        .td-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-        .td-logo-mark { width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg,#6366F1,#8B5CF6); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(99,102,241,.28); }
-        .td-logo-name { font-size: 17px; font-weight: 700; color: #0F172A; letter-spacing: -.025em; }
+        .lp { font-family: 'Inter', sans-serif; background: #fff; color: #111827; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+        .lp *, .lp *::before, .lp *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* ── Buttons ── */
-        .td-btn { display: inline-flex; align-items: center; gap: 6px; font-family: 'Instrument Sans', sans-serif; font-weight: 600; font-size: 14px; border-radius: 8px; text-decoration: none; transition: all .15s ease; cursor: pointer; border: none; letter-spacing: -.01em; line-height: 1; }
-        .td-pri { background: #6366F1; color: #fff; padding: 11px 20px; box-shadow: 0 1px 2px rgba(99,102,241,.2),0 4px 12px rgba(99,102,241,.14); }
-        .td-pri:hover { background: #5558EB; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(99,102,241,.2),0 8px 20px rgba(99,102,241,.22); }
-        .td-pri-lg { padding: 14px 28px; font-size: 15px; }
-        .td-ghost { background: transparent; color: #475569; padding: 11px 20px; border: 1px solid #E2E8F0; }
-        .td-ghost:hover { background: #F8FAFC; color: #0F172A; border-color: #CBD5E1; }
-        .td-ghost-lg { padding: 13px 24px; font-size: 15px; }
-        .td-wht { display: inline-flex; align-items: center; gap: 7px; background: #fff; color: #0F172A; padding: 14px 28px; font-size: 15px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: all .15s; letter-spacing: -.015em; position: relative; }
-        .td-wht:hover { background: #F1F5F9; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+        /* NAV */
+        .lp-nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid #F3F4F6; }
+        .lp-nav-in { max-width: 1180px; margin: 0 auto; padding: 0 28px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+        .lp-brand { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+        .lp-brand-icon { width: 32px; height: 32px; border-radius: 8px; background: #111827; display: flex; align-items: center; justify-content: center; }
+        .lp-brand-name { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: #111827; }
 
-        /* ── Hero ── */
-        .td-hero { padding: 104px 32px 88px; text-align: center; position: relative; overflow: hidden; }
-        .td-hero-glow { position: absolute; inset: 0; background: radial-gradient(ellipse 90% 65% at 50% -10%,rgba(99,102,241,.1),transparent), radial-gradient(ellipse 55% 45% at 82% 85%,rgba(139,92,246,.06),transparent), radial-gradient(ellipse 55% 45% at 18% 75%,rgba(6,182,212,.05),transparent); pointer-events: none; }
-        .td-dots { position: absolute; inset: 0; background-image: radial-gradient(circle,#CBD5E1 1px,transparent 1px); background-size: 30px 30px; mask-image: radial-gradient(ellipse 75% 55% at 50% 50%,black 25%,transparent 70%); -webkit-mask-image: radial-gradient(ellipse 75% 55% at 50% 50%,black 25%,transparent 70%); pointer-events: none; opacity: .55; }
-        .td-hero-in { max-width: 800px; margin: 0 auto; position: relative; }
+        .lp-btn { display: inline-flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; text-decoration: none; border-radius: 8px; transition: all .15s; cursor: pointer; border: none; }
+        .lp-btn-sm { padding: 9px 18px; }
+        .lp-btn-md { padding: 13px 26px; font-size: 15px; }
+        .lp-primary { background: #111827; color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+        .lp-primary:hover { background: #1F2937; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+        .lp-outline { background: transparent; color: #374151; border: 1.5px solid #E5E7EB; }
+        .lp-outline:hover { border-color: #9CA3AF; background: #F9FAFB; }
 
-        .td-badge { display: inline-flex; align-items: center; gap: 7px; background: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 100px; padding: 5px 14px; margin-bottom: 28px; font-size: 12.5px; color: #4F46E5; font-weight: 600; letter-spacing: -.005em; }
-        .td-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #6366F1; animation: td-pulse 2s infinite; }
-        @keyframes td-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+        /* HERO */
+        .lp-hero { padding: 72px 28px 0; max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; min-height: calc(100vh - 60px); }
+        .lp-hero-left { padding-bottom: 72px; }
+        .lp-hero-right { position: relative; padding-bottom: 0; align-self: end; }
 
-        @keyframes td-up { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
-        .td-a1{animation:td-up .65s ease both}
-        .td-a2{animation:td-up .65s .1s ease both}
-        .td-a3{animation:td-up .65s .2s ease both}
-        .td-a4{animation:td-up .65s .3s ease both}
+        .lp-tag { display: inline-flex; align-items: center; gap: 7px; background: #FEF3C7; border: 1px solid #FDE68A; border-radius: 100px; padding: 4px 12px; margin-bottom: 24px; font-size: 12px; color: #92400E; font-weight: 600; letter-spacing: .01em; }
+        .lp-tag-dot { width: 5px; height: 5px; border-radius: 50%; background: #F59E0B; animation: lp-blink 2s infinite; }
+        @keyframes lp-blink { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-        .td-h1 { font-size: clamp(42px,6.5vw,76px); font-weight: 700; line-height: 1.04; letter-spacing: -.035em; color: #0F172A; margin: 0 0 22px; }
-        .td-grad { background: linear-gradient(135deg,#6366F1 0%,#8B5CF6 45%,#06B6D4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .td-sub { font-size: 19px; line-height: 1.65; color: #64748B; max-width: 490px; margin: 0 auto 40px; font-weight: 400; font-family: 'DM Sans', sans-serif; letter-spacing: -.01em; }
-        .td-cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; align-items: center; }
-        .td-proof { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 22px; font-size: 13px; color: #94A3B8; font-family: 'DM Sans', sans-serif; }
+        @keyframes lp-rise { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+        .lp-a1 { animation: lp-rise .6s ease both; }
+        .lp-a2 { animation: lp-rise .6s .1s ease both; }
+        .lp-a3 { animation: lp-rise .6s .2s ease both; }
+        .lp-a4 { animation: lp-rise .6s .3s ease both; }
+        .lp-a5 { animation: lp-rise .6s .4s ease both; }
 
-        /* ── Stats ── */
-        .td-stats { background: #F8FAFC; border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0; }
-        .td-stats-in { max-width: 1140px; margin: 0 auto; padding: 0 32px; display: grid; grid-template-columns: repeat(3,1fr); }
-        .td-stat { padding: 44px 32px; text-align: center; border-right: 1px solid #E2E8F0; }
-        .td-stat:last-child { border-right: none; }
-        .td-stat-n { font-size: 50px; font-weight: 700; letter-spacing: -.04em; line-height: 1; margin-bottom: 6px; background: linear-gradient(135deg,#6366F1,#8B5CF6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .td-stat-l { font-size: 15px; font-weight: 600; color: #0F172A; margin-bottom: 4px; letter-spacing: -.015em; }
-        .td-stat-s { font-size: 13px; color: #94A3B8; font-family: 'DM Sans', sans-serif; }
+        .lp-h1 { font-family: 'Syne', sans-serif; font-size: clamp(40px,4.8vw,64px); font-weight: 800; line-height: 1.06; letter-spacing: -.03em; color: #111827; margin-bottom: 20px; }
+        .lp-amber { color: #D97706; }
+        .lp-p { font-size: 17px; line-height: 1.7; color: #6B7280; max-width: 440px; margin-bottom: 36px; font-weight: 400; }
+        .lp-cta-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 40px; }
+        .lp-proof { display: flex; align-items: center; gap: 18px; }
+        .lp-proof-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6B7280; }
+        .lp-check { width: 16px; height: 16px; border-radius: 50%; background: #D1FAE5; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-        /* ── Features ── */
-        .td-feats { max-width: 1140px; margin: 0 auto; padding: 96px 32px; }
-        .td-sect-lbl { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #6366F1; margin-bottom: 12px; }
-        .td-h2 { font-size: clamp(30px,3.5vw,46px); font-weight: 700; letter-spacing: -.03em; line-height: 1.1; color: #0F172A; margin: 0 0 14px; }
-        .td-sect-sub { font-size: 17px; color: #64748B; max-width: 440px; line-height: 1.65; font-family: 'DM Sans', sans-serif; letter-spacing: -.01em; }
-        .td-sect-head { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: end; margin-bottom: 52px; }
-        .td-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: #E2E8F0; border: 1px solid #E2E8F0; border-radius: 16px; overflow: hidden; }
-        .td-card { background: #fff; padding: 32px 28px; transition: background .15s; }
-        .td-card:hover { background: #FAFBFF; }
-        .td-card-ico { width: 44px; height: 44px; border-radius: 10px; background: #EEF2FF; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
-        .td-card-t { font-size: 15px; font-weight: 700; color: #0F172A; letter-spacing: -.02em; margin: 0 0 8px; }
-        .td-card-d { font-size: 14px; color: #64748B; line-height: 1.6; font-family: 'DM Sans', sans-serif; margin: 0; }
+        /* DASHBOARD MOCKUP */
+        .lp-mock { border-radius: 14px 14px 0 0; overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,.14), 0 4px 16px rgba(0,0,0,.06); border: 1px solid #E5E7EB; border-bottom: none; background: #fff; animation: lp-rise .8s .2s ease both; }
+        .lp-mock-bar { background: #F9FAFB; border-bottom: 1px solid #E5E7EB; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+        .lp-mock-dots { display: flex; gap: 5px; }
+        .lp-mock-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .lp-mock-url { flex: 1; background: #fff; border: 1px solid #E5E7EB; border-radius: 6px; padding: 4px 10px; font-size: 11px; color: #9CA3AF; font-family: monospace; }
+        .lp-mock-body { display: grid; grid-template-columns: 180px 1fr; height: 380px; }
+        .lp-mock-side { background: #111827; padding: 16px 12px; display: flex; flex-direction: column; gap: 3px; }
+        .lp-mock-logo { display: flex; align-items: center; gap: 8px; padding: 8px 8px 16px; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 8px; }
+        .lp-mock-logo-icon { width: 24px; height: 24px; border-radius: 5px; background: #F59E0B; display: flex; align-items: center; justify-content: center; }
+        .lp-mock-logo-name { font-size: 12px; font-weight: 700; color: #fff; }
+        .lp-mock-nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; font-size: 11.5px; color: rgba(255,255,255,.5); transition: all .15s; }
+        .lp-mock-nav-item.active { background: rgba(255,255,255,.1); color: #fff; }
+        .lp-mock-main { padding: 20px; overflow: hidden; background: #F9FAFB; }
+        .lp-mock-page-title { font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 14px; }
+        .lp-mock-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 14px; }
+        .lp-mock-stat { background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; padding: 10px 12px; }
+        .lp-mock-stat-n { font-size: 20px; font-weight: 700; color: #111827; line-height: 1; }
+        .lp-mock-stat-l { font-size: 10px; color: #9CA3AF; margin-top: 3px; }
+        .lp-mock-stat-badge { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 100px; margin-top: 4px; }
+        .lp-mock-table { background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden; }
+        .lp-mock-thead { display: grid; grid-template-columns: 2fr 1.5fr 1fr; padding: 8px 12px; background: #F9FAFB; border-bottom: 1px solid #E5E7EB; }
+        .lp-mock-th { font-size: 9.5px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: .05em; }
+        .lp-mock-row { display: grid; grid-template-columns: 2fr 1.5fr 1fr; padding: 8px 12px; border-bottom: 1px solid #F3F4F6; align-items: center; }
+        .lp-mock-row:last-child { border-bottom: none; }
+        .lp-mock-name { font-size: 11px; font-weight: 600; color: #111827; }
+        .lp-mock-mod { font-size: 10px; color: #9CA3AF; }
+        .lp-mock-pill { display: inline-block; font-size: 9.5px; font-weight: 700; padding: 2px 8px; border-radius: 100px; }
 
-        /* ── Highlight ── */
-        .td-hl { background: #F8FAFC; border-top: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0; }
-        .td-hl-in { max-width: 1140px; margin: 0 auto; padding: 88px 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
-        .td-hl-visual { background: #fff; border: 1px solid #E2E8F0; border-radius: 16px; padding: 28px; box-shadow: 0 4px 24px rgba(0,0,0,.06),0 1px 4px rgba(0,0,0,.04); }
-        .td-hl-head { font-size: 11px; font-weight: 700; color: #94A3B8; letter-spacing: .07em; text-transform: uppercase; margin-bottom: 16px; }
-        .td-row { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 18px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
-        .td-row:last-child { margin-bottom: 0; }
-        .td-row-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .td-row-name { font-size: 13.5px; font-weight: 600; color: #0F172A; letter-spacing: -.01em; flex: 1; }
-        .td-row-mod { font-size: 12px; color: #94A3B8; font-family: 'DM Sans', sans-serif; }
-        .td-pill { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 100px; letter-spacing: .01em; }
+        /* STATS STRIP */
+        .lp-strip { border-top: 1px solid #F3F4F6; border-bottom: 1px solid #F3F4F6; background: #FAFAFA; }
+        .lp-strip-in { max-width: 1180px; margin: 0 auto; padding: 0 28px; display: grid; grid-template-columns: repeat(3,1fr); }
+        .lp-strip-item { padding: 40px 24px; border-right: 1px solid #F3F4F6; text-align: center; }
+        .lp-strip-item:last-child { border-right: none; }
+        .lp-strip-n { font-family: 'Syne', sans-serif; font-size: 48px; font-weight: 800; color: #111827; line-height: 1; letter-spacing: -.04em; margin-bottom: 6px; }
+        .lp-strip-l { font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 4px; }
+        .lp-strip-s { font-size: 13px; color: #9CA3AF; }
 
-        /* ── CTA ── */
-        .td-cta { max-width: 1140px; margin: 0 auto; padding: 32px 32px 96px; }
-        .td-cta-box { background: linear-gradient(140deg,#0F172A 0%,#1E1B4B 55%,#1E1B4B 100%); border-radius: 20px; padding: 80px 48px; text-align: center; position: relative; overflow: hidden; }
-        .td-cta-mesh { position: absolute; inset: 0; background: radial-gradient(ellipse 55% 65% at 28% 50%,rgba(99,102,241,.3),transparent), radial-gradient(ellipse 45% 55% at 72% 50%,rgba(6,182,212,.18),transparent); pointer-events: none; }
-        .td-cta-h { font-size: clamp(30px,3.5vw,46px); font-weight: 700; letter-spacing: -.03em; color: #fff; margin: 0 0 14px; position: relative; }
-        .td-cta-p { font-size: 17px; color: rgba(255,255,255,.55); margin: 0 0 36px; position: relative; font-family: 'DM Sans', sans-serif; letter-spacing: -.01em; }
+        /* BENTO FEATURES */
+        .lp-bento-wrap { max-width: 1180px; margin: 0 auto; padding: 96px 28px; }
+        .lp-bento-header { margin-bottom: 48px; }
+        .lp-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #D97706; margin-bottom: 12px; }
+        .lp-h2 { font-family: 'Syne', sans-serif; font-size: clamp(32px,3.5vw,48px); font-weight: 800; letter-spacing: -.03em; color: #111827; line-height: 1.08; }
 
-        /* ── Footer ── */
-        .td-foot-wrap { border-top: 1px solid #E2E8F0; }
-        .td-foot { max-width: 1140px; margin: 0 auto; padding: 28px 32px; display: flex; align-items: center; justify-content: space-between; }
-        .td-foot-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-        .td-foot-mark { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg,#6366F1,#8B5CF6); display: flex; align-items: center; justify-content: center; }
-        .td-foot-name { font-size: 14px; font-weight: 700; color: #0F172A; letter-spacing: -.02em; }
-        .td-foot-copy { font-size: 13px; color: #94A3B8; font-family: 'DM Sans', sans-serif; }
+        .lp-bento { display: grid; grid-template-columns: repeat(12, 1fr); grid-auto-rows: 180px; gap: 14px; }
+        .lp-b { border-radius: 14px; padding: 28px; overflow: hidden; position: relative; transition: transform .2s, box-shadow .2s; }
+        .lp-b:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,.1); }
+        .lp-b1 { grid-column: span 5; grid-row: span 1; background: #111827; color: #fff; }
+        .lp-b2 { grid-column: span 7; grid-row: span 1; background: #FFFBEB; border: 1px solid #FDE68A; }
+        .lp-b3 { grid-column: span 4; grid-row: span 1; background: #EFF6FF; border: 1px solid #BFDBFE; }
+        .lp-b4 { grid-column: span 4; grid-row: span 1; background: #F0FDF4; border: 1px solid #BBF7D0; }
+        .lp-b5 { grid-column: span 4; grid-row: span 1; background: #FDF4FF; border: 1px solid #E9D5FF; }
+        .lp-b6 { grid-column: span 7; grid-row: span 1; background: #FFF7ED; border: 1px solid #FED7AA; }
+        .lp-b7 { grid-column: span 5; grid-row: span 1; background: #F0F9FF; border: 1px solid #BAE6FD; }
 
-        @media (max-width: 768px) {
-          .td-stats-in { grid-template-columns: 1fr; }
-          .td-stat { border-right: none; border-bottom: 1px solid #E2E8F0; }
-          .td-stat:last-child { border-bottom: none; }
-          .td-grid { grid-template-columns: 1fr; }
-          .td-sect-head { grid-template-columns: 1fr; gap: 16px; }
-          .td-hl-in { grid-template-columns: 1fr; gap: 40px; }
-          .td-foot { flex-direction: column; gap: 10px; text-align: center; }
-          .td-cta-box { padding: 56px 24px; }
-          .td-nav-in { padding: 0 20px; }
-          .td-hero { padding: 72px 20px 64px; }
+        .lp-b-ico { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+        .lp-b-t { font-size: 15px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 8px; }
+        .lp-b-d { font-size: 13.5px; line-height: 1.6; }
+
+        /* HIGHLIGHT */
+        .lp-hl { background: #FAFAFA; border-top: 1px solid #F3F4F6; border-bottom: 1px solid #F3F4F6; }
+        .lp-hl-in { max-width: 1180px; margin: 0 auto; padding: 88px 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+        .lp-hl-vis { background: #fff; border: 1px solid #E5E7EB; border-radius: 16px; padding: 28px; box-shadow: 0 4px 24px rgba(0,0,0,.05); }
+        .lp-hl-ttl { font-size: 11px; font-weight: 700; color: #9CA3AF; letter-spacing: .07em; text-transform: uppercase; margin-bottom: 16px; }
+        .lp-stu-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #FAFAFA; border: 1px solid #F3F4F6; border-radius: 10px; margin-bottom: 8px; }
+        .lp-stu-row:last-child { margin-bottom: 0; }
+        .lp-stu-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .lp-stu-name { font-size: 13.5px; font-weight: 600; color: #111827; flex: 1; }
+        .lp-stu-mod { font-size: 12px; color: #9CA3AF; }
+        .lp-stu-tag { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 100px; }
+
+        /* CTA */
+        .lp-cta { max-width: 1180px; margin: 0 auto; padding: 32px 28px 96px; }
+        .lp-cta-box { background: #111827; border-radius: 20px; padding: 80px 48px; text-align: center; position: relative; overflow: hidden; }
+        .lp-cta-glow { position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 500px; height: 300px; background: radial-gradient(ellipse,rgba(245,158,11,.25),transparent); pointer-events: none; }
+        .lp-cta-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px); background-size: 40px 40px; pointer-events: none; }
+        .lp-cta-h { font-family: 'Syne', sans-serif; font-size: clamp(32px,3.5vw,52px); font-weight: 800; letter-spacing: -.03em; color: #fff; margin-bottom: 14px; position: relative; }
+        .lp-cta-p { font-size: 17px; color: rgba(255,255,255,.5); margin-bottom: 36px; position: relative; }
+        .lp-cta-btn { display: inline-flex; align-items: center; gap: 8px; background: #F59E0B; color: #111827; padding: 15px 32px; font-size: 15px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: all .15s; position: relative; letter-spacing: -.01em; }
+        .lp-cta-btn:hover { background: #FBBF24; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,158,11,.35); }
+
+        /* FOOTER */
+        .lp-foot { border-top: 1px solid #F3F4F6; }
+        .lp-foot-in { max-width: 1180px; margin: 0 auto; padding: 28px; display: flex; align-items: center; justify-content: space-between; }
+        .lp-foot-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .lp-foot-icon { width: 26px; height: 26px; border-radius: 6px; background: #111827; display: flex; align-items: center; justify-content: center; }
+        .lp-foot-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #111827; }
+        .lp-foot-copy { font-size: 13px; color: #9CA3AF; }
+
+        @media (max-width: 900px) {
+          .lp-hero { grid-template-columns: 1fr; min-height: auto; padding-top: 56px; }
+          .lp-hero-right { display: none; }
+          .lp-hero-left { padding-bottom: 56px; }
+          .lp-strip-in { grid-template-columns: 1fr; }
+          .lp-strip-item { border-right: none; border-bottom: 1px solid #F3F4F6; }
+          .lp-strip-item:last-child { border-bottom: none; }
+          .lp-bento { grid-template-columns: 1fr 1fr; grid-auto-rows: auto; }
+          .lp-b1,.lp-b2,.lp-b3,.lp-b4,.lp-b5,.lp-b6,.lp-b7 { grid-column: span 1; }
+          .lp-hl-in { grid-template-columns: 1fr; gap: 40px; }
+          .lp-foot-in { flex-direction: column; gap: 10px; text-align: center; }
+          .lp-cta-box { padding: 56px 24px; }
+        }
+        @media (max-width: 600px) {
+          .lp-bento { grid-template-columns: 1fr; }
+          .lp-mock-stats { grid-template-columns: repeat(2,1fr); }
+          .lp-proof { flex-direction: column; align-items: flex-start; gap: 8px; }
         }
       `}</style>
 
-      <div className="td">
+      <div className="lp">
 
-        {/* Nav */}
-        <nav className="td-nav">
-          <div className="td-nav-in">
-            <div className="td-logo">
-              <div className="td-logo-mark"><Sparkles size={15} color="#fff" /></div>
-              <span className="td-logo-name">TutorDash</span>
+        {/* NAV */}
+        <nav className="lp-nav">
+          <div className="lp-nav-in">
+            <div className="lp-brand">
+              <div className="lp-brand-icon"><Sparkles size={14} color="#F59E0B" /></div>
+              <span className="lp-brand-name">TutorDash</span>
             </div>
-            <Link to="/dashboard" className="td-btn td-pri">Open Dashboard</Link>
+            <Link to="/dashboard" className="lp-btn lp-primary lp-btn-sm">Open Dashboard</Link>
           </div>
         </nav>
 
-        {/* Hero */}
-        <section className="td-hero">
-          <div className="td-hero-glow" />
-          <div className="td-dots" />
-          <div className="td-hero-in">
-            <div className="td-a1">
-              <div className="td-badge"><span className="td-badge-dot" />Purpose-built for tutors</div>
+        {/* HERO */}
+        <div className="lp-hero">
+          <div className="lp-hero-left">
+            <div className="lp-a1">
+              <div className="lp-tag"><span className="lp-tag-dot" />Purpose-built for independent tutors</div>
             </div>
-            <h1 className="td-h1 td-a2">
-              The professional toolkit<br />for <span className="td-grad">independent tutors</span>
+            <h1 className="lp-h1 lp-a2">
+              Your students.<br />
+              Your schedule.<br />
+              <span className="lp-amber">Your classroom.</span>
             </h1>
-            <p className="td-sub td-a3">
-              Replace your spreadsheets and WhatsApp chaos with one clean dashboard. Students, lessons, attendance, grades — all in one place.
+            <p className="lp-p lp-a3">
+              Replace the WhatsApp groups and Excel spreadsheets. TutorDash gives you a real professional workspace — students, lessons, attendance, grades, all in one place.
             </p>
-            <div className="td-cta-row td-a4">
-              <Link to="/dashboard" className="td-btn td-pri td-pri-lg">Get started free <ArrowRight size={16} /></Link>
-              <Link to="/dashboard" className="td-btn td-ghost td-ghost-lg">Open Dashboard</Link>
+            <div className="lp-cta-row lp-a4">
+              <Link to="/dashboard" className="lp-btn lp-primary lp-btn-md">Get started free <ArrowRight size={16} /></Link>
+              <Link to="/dashboard" className="lp-btn lp-outline lp-btn-md">Open Dashboard</Link>
             </div>
-            <div className="td-proof td-a4">
-              <span>Free to use</span><span>·</span>
-              <span>No credit card</span><span>·</span>
-              <span>2 minute setup</span>
+            <div className="lp-proof lp-a5">
+              {["Free to use", "No credit card", "2 min setup"].map(t => (
+                <div key={t} className="lp-proof-item">
+                  <div className="lp-check">
+                    <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1.5 4.5l2 2 4-4" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </div>
+                  {t}
+                </div>
+              ))}
             </div>
           </div>
-        </section>
 
-        {/* Stats */}
-        <div className="td-stats">
-          <div className="td-stats-in">
+          {/* DASHBOARD MOCKUP */}
+          <div className="lp-hero-right">
+            <div className="lp-mock">
+              {/* browser bar */}
+              <div className="lp-mock-bar">
+                <div className="lp-mock-dots">
+                  <div className="lp-mock-dot" style={{background:"#FF5F57"}} />
+                  <div className="lp-mock-dot" style={{background:"#FEBC2E"}} />
+                  <div className="lp-mock-dot" style={{background:"#28C840"}} />
+                </div>
+                <div className="lp-mock-url">tutorsdash.vercel.app/dashboard</div>
+              </div>
+              {/* dashboard body */}
+              <div className="lp-mock-body">
+                {/* sidebar */}
+                <div className="lp-mock-side">
+                  <div className="lp-mock-logo">
+                    <div className="lp-mock-logo-icon"><Sparkles size={11} color="#111827" /></div>
+                    <span className="lp-mock-logo-name">TutorDash</span>
+                  </div>
+                  {[
+                    {icon: LayoutDashboard, label: "Dashboard", active: true},
+                    {icon: Users, label: "Students", active: false},
+                    {icon: CalendarDays, label: "Lessons", active: false},
+                    {icon: CheckSquare, label: "Attendance", active: false},
+                    {icon: BookOpen, label: "Modules", active: false},
+                    {icon: FolderOpen, label: "Materials", active: false},
+                  ].map(item => (
+                    <div key={item.label} className={`lp-mock-nav-item${item.active ? " active" : ""}`}>
+                      <item.icon size={13} />
+                      <span>{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+                {/* main */}
+                <div className="lp-mock-main">
+                  <div className="lp-mock-page-title">Dashboard</div>
+                  <div className="lp-mock-stats">
+                    <div className="lp-mock-stat">
+                      <div className="lp-mock-stat-n">12</div>
+                      <div className="lp-mock-stat-l">Students</div>
+                      <div className="lp-mock-stat-badge" style={{background:"#FEF3C7",color:"#D97706"}}>↑ 2 new</div>
+                    </div>
+                    <div className="lp-mock-stat">
+                      <div className="lp-mock-stat-n" style={{fontSize:14}}>Today 3pm</div>
+                      <div className="lp-mock-stat-l">Next Lesson</div>
+                      <div className="lp-mock-stat-badge" style={{background:"#EFF6FF",color:"#2563EB"}}>IELTS Speaking</div>
+                    </div>
+                    <div className="lp-mock-stat">
+                      <div className="lp-mock-stat-n">87%</div>
+                      <div className="lp-mock-stat-l">Attendance</div>
+                      <div className="lp-mock-stat-badge" style={{background:"#F0FDF4",color:"#16A34A"}}>↑ Good</div>
+                    </div>
+                    <div className="lp-mock-stat">
+                      <div className="lp-mock-stat-n">2</div>
+                      <div className="lp-mock-stat-l">Pending</div>
+                      <div className="lp-mock-stat-badge" style={{background:"#FEF2F2",color:"#DC2626"}}>Due soon</div>
+                    </div>
+                  </div>
+                  <div className="lp-mock-table">
+                    <div className="lp-mock-thead">
+                      <div className="lp-mock-th">Student</div>
+                      <div className="lp-mock-th">Module</div>
+                      <div className="lp-mock-th">Status</div>
+                    </div>
+                    {[
+                      {name:"Ali Hassan",   mod:"IELTS Speaking", s:"Active",  bg:"#F0FDF4",c:"#16A34A"},
+                      {name:"Fatima Malik", mod:"Sociology",       s:"Active",  bg:"#F0FDF4",c:"#16A34A"},
+                      {name:"Ahmed Raza",   mod:"Math Grade 9",    s:"Pending", bg:"#FFFBEB",c:"#D97706"},
+                    ].map(r => (
+                      <div key={r.name} className="lp-mock-row">
+                        <div><div className="lp-mock-name">{r.name}</div></div>
+                        <div className="lp-mock-mod">{r.mod}</div>
+                        <div><span className="lp-mock-pill" style={{background:r.bg,color:r.c}}>{r.s}</span></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* STATS */}
+        <div className="lp-strip">
+          <div className="lp-strip-in">
             {[
-              { n: "9+",   l: "Core Features",      s: "Students to progress reports" },
-              { n: "2 min",l: "Setup Time",          s: "First student added in minutes" },
-              { n: "100%", l: "Spreadsheet-Free",    s: "Everything in one dashboard" },
-            ].map((s, i) => (
-              <div key={i} className="td-stat">
-                <div className="td-stat-n">{s.n}</div>
-                <div className="td-stat-l">{s.l}</div>
-                <div className="td-stat-s">{s.s}</div>
+              {n:"9+",     l:"Core features",     s:"Students to progress reports"},
+              {n:"2 min",  l:"Setup time",         s:"First student added in minutes"},
+              {n:"100%",   l:"Spreadsheet-free",   s:"Everything in one dashboard"},
+            ].map((s,i) => (
+              <div key={i} className="lp-strip-item">
+                <div className="lp-strip-n">{s.n}</div>
+                <div className="lp-strip-l">{s.l}</div>
+                <div className="lp-strip-s">{s.s}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Features */}
-        <section className="td-feats">
-          <div className="td-sect-head">
-            <div>
-              <div className="td-sect-lbl">Features</div>
-              <h2 className="td-h2">Everything you need,<br />nothing you don't</h2>
-            </div>
-            <p className="td-sect-sub">
-              TutorDash gives you the right tools to run your tutoring professionally — without the complexity of enterprise software.
-            </p>
+        {/* BENTO FEATURES */}
+        <section className="lp-bento-wrap">
+          <div className="lp-bento-header">
+            <div className="lp-eyebrow">Features</div>
+            <h2 className="lp-h2">Everything a tutor needs.<br />Nothing they don't.</h2>
           </div>
-          <div className="td-grid">
-            {features.map((f) => (
-              <div key={f.title} className="td-card">
-                <div className="td-card-ico"><f.icon size={20} color="#6366F1" /></div>
-                <p className="td-card-t">{f.title}</p>
-                <p className="td-card-d">{f.desc}</p>
-              </div>
-            ))}
+          <div className="lp-bento">
+            <div className="lp-b lp-b1">
+              <div className="lp-b-ico" style={{background:"rgba(255,255,255,.1)"}}><Users size={20} color="#fff" /></div>
+              <div className="lp-b-t" style={{color:"#fff"}}>Student Management</div>
+              <div className="lp-b-d" style={{color:"rgba(255,255,255,.55)"}}>Every student's details, modules, grades, and history — all in one profile.</div>
+            </div>
+            <div className="lp-b lp-b2">
+              <div className="lp-b-ico" style={{background:"#FDE68A"}}><CalendarDays size={20} color="#92400E" /></div>
+              <div className="lp-b-t" style={{color:"#92400E"}}>Lesson Scheduling</div>
+              <div className="lp-b-d" style={{color:"#A16207"}}>Plan lessons with dates, topics, and notes. See your week clearly on the dashboard.</div>
+            </div>
+            <div className="lp-b lp-b3">
+              <div className="lp-b-ico" style={{background:"#BFDBFE"}}><CheckSquare size={20} color="#1D4ED8" /></div>
+              <div className="lp-b-t" style={{color:"#1E40AF"}}>Attendance Tracking</div>
+              <div className="lp-b-d" style={{color:"#3B82F6"}}>Mark in a tap. Monthly rates auto-calculated.</div>
+            </div>
+            <div className="lp-b lp-b4">
+              <div className="lp-b-ico" style={{background:"#BBF7D0"}}><ClipboardList size={20} color="#15803D" /></div>
+              <div className="lp-b-t" style={{color:"#15803D"}}>Assignments</div>
+              <div className="lp-b-d" style={{color:"#16A34A"}}>Assign tasks and track who's submitted.</div>
+            </div>
+            <div className="lp-b lp-b5">
+              <div className="lp-b-ico" style={{background:"#E9D5FF"}}><TrendingUp size={20} color="#7E22CE" /></div>
+              <div className="lp-b-t" style={{color:"#7E22CE"}}>Progress Reports</div>
+              <div className="lp-b-d" style={{color:"#9333EA"}}>Auto-generated reports ready to share.</div>
+            </div>
+            <div className="lp-b lp-b6">
+              <div className="lp-b-ico" style={{background:"#FED7AA"}}><FolderOpen size={20} color="#C2410C" /></div>
+              <div className="lp-b-t" style={{color:"#C2410C"}}>Materials Upload</div>
+              <div className="lp-b-d" style={{color:"#EA580C"}}>Upload PDFs by module. Students access files from their own portal link — no WhatsApp file sharing needed.</div>
+            </div>
+            <div className="lp-b lp-b7">
+              <div className="lp-b-ico" style={{background:"#BAE6FD"}}><BookOpen size={20} color="#0369A1" /></div>
+              <div className="lp-b-t" style={{color:"#0369A1"}}>Module Management</div>
+              <div className="lp-b-d" style={{color:"#0284C7"}}>Create batches like "IELTS Speaking" and assign students to them.</div>
+            </div>
           </div>
         </section>
 
-        {/* Student preview highlight */}
-        <div className="td-hl">
-          <div className="td-hl-in">
+        {/* STUDENT PREVIEW */}
+        <div className="lp-hl">
+          <div className="lp-hl-in">
             <div>
-              <div className="td-sect-lbl">Student Management</div>
-              <h2 className="td-h2" style={{ fontSize: "clamp(26px,2.8vw,38px)", marginBottom: 16 }}>
-                Every student,<br />perfectly organised
+              <div className="lp-eyebrow">Student Portal</div>
+              <h2 className="lp-h2" style={{fontSize:"clamp(28px,2.8vw,40px)", marginBottom:16}}>
+                Share a link.<br />Students see everything.
               </h2>
-              <p className="td-sect-sub">
-                Add students once and track everything — modules, attendance, grades, and assignments — from a single profile. Share a portal link and they access their materials instantly.
+              <p style={{fontSize:16, lineHeight:1.7, color:"#6B7280", maxWidth:400, marginBottom:28}}>
+                Each student gets a private portal link. They can see their assigned modules, download materials, and check their progress — without needing to ask you on WhatsApp.
               </p>
-              <div style={{ marginTop: 28 }}>
-                <Link to="/dashboard" className="td-btn td-pri">Try it now <ArrowRight size={14} /></Link>
-              </div>
+              <Link to="/dashboard" className="lp-btn lp-primary lp-btn-md">Try it now <ArrowRight size={14} /></Link>
             </div>
-            <div className="td-hl-visual">
-              <div className="td-hl-head">Your Students</div>
-              {mockStudents.map((s) => (
-                <div key={s.name} className="td-row">
-                  <span className="td-row-dot" style={{ background: s.dot }} />
-                  <div style={{ flex: 1 }}>
-                    <div className="td-row-name">{s.name}</div>
-                    <div className="td-row-mod">{s.module}</div>
+            <div className="lp-hl-vis">
+              <div className="lp-hl-ttl">Your Students</div>
+              {[
+                {name:"Ali Hassan",   mod:"IELTS Speaking", s:"Active",  dot:"#22C55E", bg:"#F0FDF4", c:"#16A34A"},
+                {name:"Fatima Malik", mod:"Sociology",       s:"Active",  dot:"#22C55E", bg:"#F0FDF4", c:"#16A34A"},
+                {name:"Ahmed Raza",   mod:"IELTS Writing",   s:"Pending", dot:"#F59E0B", bg:"#FFFBEB", c:"#D97706"},
+                {name:"Sara Khan",    mod:"Math Grade 9",    s:"Active",  dot:"#22C55E", bg:"#F0FDF4", c:"#16A34A"},
+              ].map(s => (
+                <div key={s.name} className="lp-stu-row">
+                  <span className="lp-stu-dot" style={{background:s.dot}} />
+                  <div style={{flex:1}}>
+                    <div className="lp-stu-name">{s.name}</div>
+                    <div className="lp-stu-mod">{s.mod}</div>
                   </div>
-                  <span className="td-pill" style={{ background: s.bg, color: s.tx }}>{s.status}</span>
+                  <span className="lp-stu-tag" style={{background:s.bg, color:s.c}}>{s.s}</span>
                 </div>
               ))}
             </div>
@@ -241,23 +385,24 @@ function LandingPage() {
         </div>
 
         {/* CTA */}
-        <div className="td-cta">
-          <div className="td-cta-box">
-            <div className="td-cta-mesh" />
-            <h2 className="td-cta-h">Start your dashboard today</h2>
-            <p className="td-cta-p">Set up in 2 minutes. No credit card. No setup fee.</p>
-            <Link to="/dashboard" className="td-wht">Get started free <ArrowRight size={16} /></Link>
+        <div className="lp-cta">
+          <div className="lp-cta-box">
+            <div className="lp-cta-glow" />
+            <div className="lp-cta-grid" />
+            <h2 className="lp-cta-h">Start your dashboard today</h2>
+            <p className="lp-cta-p">Set up in 2 minutes. Free forever. No credit card.</p>
+            <Link to="/dashboard" className="lp-cta-btn">Get started free <ArrowRight size={16} /></Link>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="td-foot-wrap">
-          <div className="td-foot">
-            <div className="td-foot-logo">
-              <div className="td-foot-mark"><Sparkles size={12} color="#fff" /></div>
-              <span className="td-foot-name">TutorDash</span>
+        {/* FOOTER */}
+        <div className="lp-foot">
+          <div className="lp-foot-in">
+            <div className="lp-foot-logo">
+              <div className="lp-foot-icon"><Sparkles size={12} color="#F59E0B" /></div>
+              <span className="lp-foot-name">TutorDash</span>
             </div>
-            <span className="td-foot-copy">© {new Date().getFullYear()} TutorDash. Made for tutors who mean business.</span>
+            <span className="lp-foot-copy">© {new Date().getFullYear()} TutorDash. Made for tutors who mean business.</span>
           </div>
         </div>
 

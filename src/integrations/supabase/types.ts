@@ -14,7 +14,349 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      assignments: {
+        Row: {
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          module_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          module_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          module_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance: {
+        Row: {
+          id: string
+          lesson_id: string
+          recorded_at: string
+          status: string
+          student_id: string
+        }
+        Insert: {
+          id?: string
+          lesson_id: string
+          recorded_at?: string
+          status: string
+          student_id: string
+        }
+        Update: {
+          id?: string
+          lesson_id?: string
+          recorded_at?: string
+          status?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grades: {
+        Row: {
+          assessment_name: string
+          created_at: string
+          date: string
+          grade: string | null
+          id: string
+          marks_obtained: number
+          module_id: string | null
+          percentage: number | null
+          student_id: string
+          total_marks: number
+        }
+        Insert: {
+          assessment_name: string
+          created_at?: string
+          date?: string
+          grade?: string | null
+          id?: string
+          marks_obtained: number
+          module_id?: string | null
+          percentage?: number | null
+          student_id: string
+          total_marks: number
+        }
+        Update: {
+          assessment_name?: string
+          created_at?: string
+          date?: string
+          grade?: string | null
+          id?: string
+          marks_obtained?: number
+          module_id?: string | null
+          percentage?: number | null
+          student_id?: string
+          total_marks?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grades_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grades_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lessons: {
+        Row: {
+          created_at: string
+          id: string
+          lesson_date: string
+          module_id: string | null
+          notes: string | null
+          student_id: string | null
+          topic: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lesson_date: string
+          module_id?: string | null
+          notes?: string | null
+          student_id?: string | null
+          topic?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lesson_date?: string
+          module_id?: string | null
+          notes?: string | null
+          student_id?: string | null
+          topic?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      materials: {
+        Row: {
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          module_id: string
+          topic: string | null
+          uploaded_at: string
+        }
+        Insert: {
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          module_id: string
+          topic?: string | null
+          uploaded_at?: string
+        }
+        Update: {
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          module_id?: string
+          topic?: string | null
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "materials_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modules: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          subject_area: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          subject_area?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          subject_area?: string | null
+        }
+        Relationships: []
+      }
+      student_assignments: {
+        Row: {
+          assignment_id: string
+          id: string
+          notes: string | null
+          status: string
+          student_id: string
+          submitted_at: string | null
+        }
+        Insert: {
+          assignment_id: string
+          id?: string
+          notes?: string | null
+          status?: string
+          student_id: string
+          submitted_at?: string | null
+        }
+        Update: {
+          assignment_id?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          student_id?: string
+          submitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_assignments_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_assignments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_modules: {
+        Row: {
+          assigned_at: string
+          id: string
+          module_id: string
+          student_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          id?: string
+          module_id: string
+          student_id: string
+        }
+        Update: {
+          assigned_at?: string
+          id?: string
+          module_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_modules_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_modules_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          share_token: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          share_token?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          share_token?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

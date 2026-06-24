@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, CalendarDays, ClipboardList, CheckSquare } from "lucide-react";
 import { fmtDateTime } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { OnboardingWizard } from "@/components/onboarding-wizard";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -63,6 +64,7 @@ function Dashboard() {
 
   return (
     <AppShell>
+      <OnboardingWizard open={stats !== undefined && stats.students === 0} />
       <PageHeader
         title="Dashboard"
         description="Welcome back. Here's what's happening with your tutoring."

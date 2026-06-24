@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudentsRouteImport } from './routes/students'
 import { Route as ProgressReportsRouteImport } from './routes/progress-reports'
+import { Route as PortalRouteImport } from './routes/portal'
 import { Route as ModulesRouteImport } from './routes/modules'
 import { Route as MaterialsRouteImport } from './routes/materials'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as LessonsRouteImport } from './routes/lessons'
 import { Route as GradesRouteImport } from './routes/grades'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -33,6 +35,11 @@ const ProgressReportsRoute = ProgressReportsRouteImport.update({
   path: '/progress-reports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PortalRoute = PortalRouteImport.update({
+  id: '/portal',
+  path: '/portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ModulesRoute = ModulesRouteImport.update({
   id: '/modules',
   path: '/modules',
@@ -41,6 +48,11 @@ const ModulesRoute = ModulesRouteImport.update({
 const MaterialsRoute = MaterialsRouteImport.update({
   id: '/materials',
   path: '/materials',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LessonsRoute = LessonsRouteImport.update({
@@ -96,8 +108,10 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/grades': typeof GradesRoute
   '/lessons': typeof LessonsRoute
+  '/login': typeof LoginRoute
   '/materials': typeof MaterialsRoute
   '/modules': typeof ModulesRouteWithChildren
+  '/portal': typeof PortalRoute
   '/progress-reports': typeof ProgressReportsRoute
   '/students': typeof StudentsRouteWithChildren
   '/modules/$id': typeof ModulesIdRoute
@@ -111,8 +125,10 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/grades': typeof GradesRoute
   '/lessons': typeof LessonsRoute
+  '/login': typeof LoginRoute
   '/materials': typeof MaterialsRoute
   '/modules': typeof ModulesRouteWithChildren
+  '/portal': typeof PortalRoute
   '/progress-reports': typeof ProgressReportsRoute
   '/students': typeof StudentsRouteWithChildren
   '/modules/$id': typeof ModulesIdRoute
@@ -127,8 +143,10 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/grades': typeof GradesRoute
   '/lessons': typeof LessonsRoute
+  '/login': typeof LoginRoute
   '/materials': typeof MaterialsRoute
   '/modules': typeof ModulesRouteWithChildren
+  '/portal': typeof PortalRoute
   '/progress-reports': typeof ProgressReportsRoute
   '/students': typeof StudentsRouteWithChildren
   '/modules/$id': typeof ModulesIdRoute
@@ -144,8 +162,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/grades'
     | '/lessons'
+    | '/login'
     | '/materials'
     | '/modules'
+    | '/portal'
     | '/progress-reports'
     | '/students'
     | '/modules/$id'
@@ -159,8 +179,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/grades'
     | '/lessons'
+    | '/login'
     | '/materials'
     | '/modules'
+    | '/portal'
     | '/progress-reports'
     | '/students'
     | '/modules/$id'
@@ -174,8 +196,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/grades'
     | '/lessons'
+    | '/login'
     | '/materials'
     | '/modules'
+    | '/portal'
     | '/progress-reports'
     | '/students'
     | '/modules/$id'
@@ -190,8 +214,10 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   GradesRoute: typeof GradesRoute
   LessonsRoute: typeof LessonsRoute
+  LoginRoute: typeof LoginRoute
   MaterialsRoute: typeof MaterialsRoute
   ModulesRoute: typeof ModulesRouteWithChildren
+  PortalRoute: typeof PortalRoute
   ProgressReportsRoute: typeof ProgressReportsRoute
   StudentsRoute: typeof StudentsRouteWithChildren
   StudentPortalTokenRoute: typeof StudentPortalTokenRoute
@@ -213,6 +239,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProgressReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/portal': {
+      id: '/portal'
+      path: '/portal'
+      fullPath: '/portal'
+      preLoaderRoute: typeof PortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/modules': {
       id: '/modules'
       path: '/modules'
@@ -225,6 +258,13 @@ declare module '@tanstack/react-router' {
       path: '/materials'
       fullPath: '/materials'
       preLoaderRoute: typeof MaterialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lessons': {
@@ -323,8 +363,10 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   GradesRoute: GradesRoute,
   LessonsRoute: LessonsRoute,
+  LoginRoute: LoginRoute,
   MaterialsRoute: MaterialsRoute,
   ModulesRoute: ModulesRouteWithChildren,
+  PortalRoute: PortalRoute,
   ProgressReportsRoute: ProgressReportsRoute,
   StudentsRoute: StudentsRouteWithChildren,
   StudentPortalTokenRoute: StudentPortalTokenRoute,

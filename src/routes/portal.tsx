@@ -7,7 +7,8 @@ import { fmtDate, fmtDateTime, letterGrade } from "@/lib/format";
 import { toast } from "sonner";
 import {
   Download, GraduationCap, CalendarDays, FolderOpen,
-  Zap, LogOut, KeyRound, CheckCircle2,
+  Zap, LogOut, KeyRound, CheckCircle2, MessageSquare,
+  TrendingUp, TrendingDown, Minus,
 } from "lucide-react";
 
 export const Route = createFileRoute("/portal")({
@@ -18,15 +19,13 @@ function StudentPortal() {
   const { user, role, loading, signOut } = useAuth();
   const navigate = useNavigate();
 
-  // Set-password flow
   const [showPwForm, setShowPwForm] = useState(false);
   const [newPw, setNewPw]           = useState("");
   const [confirmPw, setConfirmPw]   = useState("");
   const [pwBusy, setPwBusy]         = useState(false);
   const [pwDone, setPwDone]         = useState(false);
 
-  // Redirect non-students away
-  if (!loading && !user) { navigate({ to: "/login", replace: true }); return null; }
+  if (!loading && !user)            { navigate({ to: "/login",     replace: true }); return null; }
   if (!loading && role === "tutor") { navigate({ to: "/dashboard", replace: true }); return null; }
 
   const { data, isLoading } = useQuery({
@@ -42,15 +41,13 @@ function StudentPortal() {
 
       const sid = (student as { id: string }).id;
       const moduleIds = (
-        (student as { student_modules: { modules: { id: string } | null }[] })
-          .student_modules
+        (student as { student_modules: { modules: { id: string } | null }[] }).student_modules
       ).map((sm) => sm.modules?.id).filter(Boolean) as string[];
 
-      const [lessons, grades, attendance, materials, assignments] = await Promise.all([
+      const [lessons, grades, attendance, materials, assignments, remarks] = await Promise.all([
         supabase.from("lessons")
           .select("id,lesson_date,topic,modules(name)")
-          .eq("student_id", sid)
-          .gte("lesson_date", new Date().toISOString())
+          .eq("student_id", sid).gte("lesson_date", new Date().toISOString())
           .order("lesson_date").limit(10),
         supabase.from("grades")
           .select("id,assessment_name,marks_obtained,total_marks,percentage,date,modules(name)")
@@ -64,40 +61,52 @@ function StudentPortal() {
         supabase.from("student_assignments")
           .select("status,assignments(title,due_date,modules(name))")
           .eq("student_id", sid),
+        supabase.from("remarks")
+          .select("id,text,created_at")
+          .eq("student_id", sid).order("created_at", { ascending: false }).limit(10),
       ]);
 
-      const attRows = (attendance.data ?? []) as { status: string }[];
-      const present = attRows.filter((a) => a.status === "present").length;
-      const attPct = attRows.length ? Math.round((present / attRows.length) * 100) : 0;
-      const grades_ = (grades.data ?? []) as {
+      const attRows    = (attendance.data ?? []) as { status: string }[];
+      const present    = attRows.filter((a) => a.status === "present").length;
+      const attPct     = attRows.length ? Math.round((present / attRows.length) * 100) : 0;
+      const grades_    = (grades.data ?? []) as {
         id: string; assessment_name: string; marks_obtained: number;
         total_marks: number; percentage: number; date: string; modules: { name: string } | null;
       }[];
       const avg = grades_.length
         ? Math.round(grades_.reduce((s, g) => s + Number(g.percentage), 0) / grades_.length) : 0;
 
+      // Group grades by module for results section
+      const gradesByModule = grades_.reduce<Record<string, typeof grades_>>((acc, g) => {
+        const key = g.modules?.name ?? "General";
+        (acc[key] ??= []).push(g);
+        return acc;
+      }, {});
+
       return {
         student: student as { id: string; name: string; email: string | null; student_modules: { modules: { id: string; name: string } | null }[] },
         lessons: (lessons.data ?? []) as { id: string; lesson_date: string; topic: string | null; modules: { name: string } | null }[],
         grades: grades_,
+        gradesByModule,
         attendance: { pct: attPct, present, total: attRows.length },
         avg,
         materials: (materials.data ?? []) as { id: string; file_name: string; file_path: string; topic: string | null; modules: { name: string } | null }[],
         assignments: (assignments.data ?? []) as { status: string; assignments: { title: string; due_date: string | null; modules: { name: string } | null } | null }[],
+        remarks: (remarks.data ?? []) as { id: string; text: string; created_at: string }[],
       };
     },
   });
 
   async function downloadMaterial(path: string) {
     const { data, error } = await supabase.storage.from("materials").createSignedUrl(path, 60);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(`Could not fetch material: ${error.message}`);
     window.open(data.signedUrl, "_blank");
   }
 
   async function setPassword(e: React.FormEvent) {
     e.preventDefault();
     if (newPw !== confirmPw) { toast.error("Passwords don't match"); return; }
-    if (newPw.length < 6)    { toast.error("Password must be at least 6 characters"); return; }
+    if (newPw.length < 6)    { toast.error("Minimum 6 characters"); return; }
     setPwBusy(true);
     const { error } = await supabase.auth.updateUser({ password: newPw });
     setPwBusy(false);
@@ -105,110 +114,83 @@ function StudentPortal() {
     setPwDone(true);
     setShowPwForm(false);
     setNewPw(""); setConfirmPw("");
-    toast.success("Password set! You can now log in with email + password.");
+    toast.success("Password set! Use email + password next time.");
   }
 
-  if (loading || isLoading) {
-    return (
-      <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"#fffefb" }}>
-        <div style={{ width:28, height:28, borderRadius:"50%", border:"2.5px solid #ff4f00", borderTopColor:"transparent", animation:"spin 0.8s linear infinite" }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
+  if (loading || isLoading) return <Spinner />;
 
-  if (!data) {
-    return (
-      <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"#fffefb", padding:24, textAlign:"center", fontFamily:"'Inter',system-ui,sans-serif" }}>
-        <div>
-          <p style={{ fontSize:18, fontWeight:600, color:"#201515", marginBottom:8 }}>Not registered as a student</p>
-          <p style={{ fontSize:14, color:"#939084", marginBottom:24 }}>Your email isn't linked to any student account. Contact your tutor.</p>
-          <button onClick={() => void signOut()} style={{ fontSize:14, color:"#ff4f00", background:"none", border:"none", cursor:"pointer", textDecoration:"underline" }}>Sign out</button>
-        </div>
-      </div>
-    );
-  }
+  if (!data) return (
+    <div style={s.errPage}>
+      <p style={{ fontSize:18, fontWeight:600, color:"#201515", marginBottom:8 }}>Not registered as a student</p>
+      <p style={{ fontSize:14, color:"#939084", marginBottom:24, textAlign:"center" }}>
+        Your email isn't linked to any student account. Contact your tutor.
+      </p>
+      <button onClick={() => void signOut()} style={s.signOutLink}>Sign out</button>
+    </div>
+  );
 
-  const { student, lessons, grades, attendance, avg, materials, assignments } = data;
+  const { student, lessons, grades, gradesByModule, attendance, avg, materials, assignments, remarks } = data;
+
+  // Trend: compare last 3 vs previous 3 assessments
+  const trend = (() => {
+    if (grades.length < 4) return "neutral";
+    const recent = grades.slice(0, 3).reduce((s, g) => s + Number(g.percentage), 0) / 3;
+    const older  = grades.slice(3, 6).reduce((s, g) => s + Number(g.percentage), 0) / Math.min(3, grades.slice(3,6).length);
+    if (recent > older + 3) return "up";
+    if (recent < older - 3) return "down";
+    return "neutral";
+  })();
 
   return (
-    <div style={{ minHeight:"100vh", background:"#fffefb", fontFamily:"'Inter',system-ui,sans-serif" }}>
+    <div style={s.page}>
       {/* Header */}
-      <header style={{ background:"#201515", padding:"0 24px" }}>
-        <div style={{ maxWidth:800, margin:"0 auto", height:60, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+      <header style={s.header}>
+        <div style={s.headerInner}>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <div style={{ width:30, height:30, background:"#ff4f00", borderRadius:7, display:"flex", alignItems:"center", justifyContent:"center" }}>
-              <Zap size={14} color="#fff" />
-            </div>
+            <div style={s.logoMark}><Zap size={14} color="#fff" /></div>
             <div>
-              <div style={{ fontSize:11, color:"rgba(255,254,251,0.4)", letterSpacing:"0.08em", textTransform:"uppercase" }}>Student portal</div>
-              <div style={{ fontSize:14, fontWeight:600, color:"#fffefb" }}>{student.name}</div>
+              <div style={s.portalLabel}>Student portal</div>
+              <div style={s.studentName}>{student.name}</div>
             </div>
           </div>
           <div style={{ display:"flex", gap:8 }}>
-            <button
-              onClick={() => { setShowPwForm(!showPwForm); setPwDone(false); }}
-              style={{ display:"flex", alignItems:"center", gap:6, fontSize:12, color:"rgba(255,254,251,0.6)", background:"rgba(255,254,251,0.06)", border:"1px solid rgba(255,254,251,0.1)", borderRadius:7, padding:"6px 12px", cursor:"pointer" }}
-            >
-              <KeyRound size={13} /> {pwDone ? "Change password" : "Set password"}
-            </button>
-            <button
-              onClick={() => void signOut()}
-              style={{ display:"flex", alignItems:"center", gap:6, fontSize:12, color:"rgba(255,254,251,0.6)", background:"rgba(255,254,251,0.06)", border:"1px solid rgba(255,254,251,0.1)", borderRadius:7, padding:"6px 12px", cursor:"pointer" }}
-            >
-              <LogOut size={13} /> Sign out
-            </button>
+            <HdrBtn icon={<KeyRound size={13}/>} label={pwDone ? "Change password" : "Set password"}
+              onClick={() => { setShowPwForm(!showPwForm); setPwDone(false); }} />
+            <HdrBtn icon={<LogOut size={13}/>} label="Sign out" onClick={() => void signOut()} />
           </div>
         </div>
       </header>
 
-      <main style={{ maxWidth:800, margin:"0 auto", padding:"32px 24px" }}>
+      <main style={s.main}>
         {/* Set-password banner */}
         {!pwDone && !showPwForm && (
-          <div style={{ background:"#fff8f5", border:"1px solid #ffd4c2", borderRadius:12, padding:"14px 18px", marginBottom:24, display:"flex", alignItems:"center", justifyContent:"space-between", gap:12 }}>
+          <div style={s.banner}>
             <p style={{ fontSize:13, color:"#7a3a1e" }}>
-              <strong>Set a password</strong> so you can log in next time without needing an invite link.
+              <strong>Set a password</strong> so you can log in next time without needing an invite email.
             </p>
-            <button
-              onClick={() => setShowPwForm(true)}
-              style={{ flexShrink:0, fontSize:13, fontWeight:600, color:"#ff4f00", background:"none", border:"1.5px solid #ff4f00", borderRadius:8, padding:"6px 14px", cursor:"pointer" }}
-            >
-              Set password
-            </button>
+            <button onClick={() => setShowPwForm(true)} style={s.bannerBtn}>Set password</button>
           </div>
         )}
 
         {pwDone && (
-          <div style={{ background:"#f0fdf4", border:"1px solid #bbf7d0", borderRadius:12, padding:"14px 18px", marginBottom:24, display:"flex", alignItems:"center", gap:10 }}>
-            <CheckCircle2 size={16} color="#16a34a" />
-            <p style={{ fontSize:13, color:"#166534" }}>Password set! Next time just go to the login page and use your email + password.</p>
+          <div style={{ ...s.banner, background:"#f0fdf4", border:"1px solid #bbf7d0" }}>
+            <CheckCircle2 size={16} color="#16a34a" style={{ flexShrink:0 }} />
+            <p style={{ fontSize:13, color:"#166534" }}>
+              Password set! Next time use your email + password on the login page.
+            </p>
           </div>
         )}
 
         {/* Set-password form */}
         {showPwForm && (
-          <div style={{ background:"#fff", border:"1px solid #e2ddd6", borderRadius:12, padding:24, marginBottom:24 }}>
+          <div style={s.pwCard}>
             <h3 style={{ fontSize:15, fontWeight:600, color:"#201515", marginBottom:16 }}>Set your password</h3>
             <form onSubmit={setPassword} style={{ display:"flex", flexDirection:"column", gap:12 }}>
-              <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
-                <label style={{ fontSize:13, fontWeight:500, color:"#201515" }}>New password</label>
-                <input type="password" required minLength={6} placeholder="Min 6 characters" value={newPw}
-                  onChange={(e) => setNewPw(e.target.value)}
-                  style={{ padding:"10px 13px", fontSize:14, border:"1.5px solid #d1ccc3", borderRadius:8, color:"#201515", fontFamily:"inherit" }} />
-              </div>
-              <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
-                <label style={{ fontSize:13, fontWeight:500, color:"#201515" }}>Confirm password</label>
-                <input type="password" required minLength={6} placeholder="Same as above" value={confirmPw}
-                  onChange={(e) => setConfirmPw(e.target.value)}
-                  style={{ padding:"10px 13px", fontSize:14, border:"1.5px solid #d1ccc3", borderRadius:8, color:"#201515", fontFamily:"inherit" }} />
-              </div>
+              <PwField label="New password" value={newPw} onChange={setNewPw} placeholder="Min 6 characters" />
+              <PwField label="Confirm password" value={confirmPw} onChange={setConfirmPw} placeholder="Same as above" />
               <div style={{ display:"flex", gap:8 }}>
-                <button type="button" onClick={() => setShowPwForm(false)}
-                  style={{ flex:1, padding:"10px", fontSize:14, fontWeight:500, background:"#f3efe9", color:"#201515", border:"none", borderRadius:8, cursor:"pointer" }}>
-                  Cancel
-                </button>
-                <button type="submit" disabled={pwBusy}
-                  style={{ flex:2, padding:"10px", fontSize:14, fontWeight:700, background:"#ff4f00", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", opacity: pwBusy ? 0.7 : 1 }}>
+                <button type="button" onClick={() => setShowPwForm(false)} style={s.pwCancel}>Cancel</button>
+                <button type="submit" disabled={pwBusy} style={{ ...s.pwSave, opacity: pwBusy ? 0.7 : 1 }}>
                   {pwBusy ? "Saving…" : "Save password"}
                 </button>
               </div>
@@ -216,89 +198,150 @@ function StudentPortal() {
           </div>
         )}
 
-        {/* Stats */}
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:24 }}>
-          <StatCard label="Attendance" value={`${attendance.pct}%`} sub={`${attendance.present}/${attendance.total} sessions`} />
-          <StatCard label="Avg grade" value={`${avg}%`} sub={letterGrade(avg)} />
+        {/* ── Stats strip ── */}
+        <div style={s.statsGrid}>
+          <StatCard label="Attendance" value={`${attendance.pct}%`} sub={`${attendance.present}/${attendance.total} sessions`} bar={attendance.pct} barColor="#ff4f00" />
+          <StatCard label="Overall grade" value={`${avg}%`} sub={letterGrade(avg)}
+            bar={avg}
+            barColor={avg >= 70 ? "#16a34a" : avg >= 50 ? "#ff4f00" : "#dc2626"}
+            badge={trend === "up" ? <TrendUp/> : trend === "down" ? <TrendDown/> : undefined}
+          />
           <StatCard label="Modules" value={String(student.student_modules.length)} />
         </div>
 
-        {/* Upcoming lessons */}
-        <Section title="Upcoming lessons" icon={<CalendarDays size={16} color="#ff4f00" />}>
+        {/* ── Results (grades by module) ── */}
+        <Section title="Results" icon={<GraduationCap size={16} color="#ff4f00"/>}>
+          {grades.length === 0
+            ? <Empty msg="No results recorded yet." />
+            : Object.entries(gradesByModule).map(([mod, items]) => {
+                const modAvg = Math.round(items.reduce((s, g) => s + Number(g.percentage), 0) / items.length);
+                return (
+                  <div key={mod} style={{ marginBottom:16 }}>
+                    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
+                      <span style={{ fontSize:13, fontWeight:600, color:"#201515" }}>{mod}</span>
+                      <span style={{
+                        fontSize:11, fontWeight:700, borderRadius:5, padding:"2px 8px",
+                        background: modAvg >= 70 ? "#dcfce7" : modAvg >= 50 ? "#fff8f5" : "#fef2f2",
+                        color:      modAvg >= 70 ? "#166534" : modAvg >= 50 ? "#7a3a1e" : "#dc2626",
+                      }}>
+                        Avg {modAvg}% · {letterGrade(modAvg)}
+                      </span>
+                    </div>
+                    {items.map((g) => {
+                      const pct = Math.round(Number(g.percentage));
+                      return (
+                        <div key={g.id} style={{ marginBottom:10 }}>
+                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, marginBottom:4 }}>
+                            <span style={{ color:"#201515" }}>{g.assessment_name}</span>
+                            <span style={{ fontWeight:600, color:"#201515" }}>
+                              {g.marks_obtained}/{g.total_marks}
+                              <span style={{ color:"#939084", fontWeight:400 }}> ({pct}%) · {fmtDate(g.date)}</span>
+                            </span>
+                          </div>
+                          <div style={{ height:6, background:"#f3efe9", borderRadius:4, overflow:"hidden" }}>
+                            <div style={{
+                              height:"100%", borderRadius:4,
+                              width:`${pct}%`,
+                              background: pct >= 70 ? "#16a34a" : pct >= 50 ? "#ff4f00" : "#dc2626",
+                              transition:"width 0.4s ease",
+                            }}/>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })
+          }
+        </Section>
+
+        {/* ── Upcoming lessons ── */}
+        <Section title="Upcoming lessons" icon={<CalendarDays size={16} color="#ff4f00"/>}>
           {lessons.length === 0
-            ? <Empty msg="No upcoming lessons scheduled." />
+            ? <Empty msg="No upcoming lessons." />
             : lessons.map((l) => (
               <Row key={l.id}
-                left={<><span style={{ fontWeight:500 }}>{l.topic ?? "Lesson"}</span><span style={{ color:"#939084" }}> · {l.modules?.name}</span></>}
+                left={<><strong>{l.topic ?? "Lesson"}</strong><span style={{ color:"#939084" }}> · {l.modules?.name}</span></>}
                 right={fmtDateTime(l.lesson_date)}
               />
-            ))}
+            ))
+          }
         </Section>
 
-        {/* Grades */}
-        <Section title="Grades" icon={<GraduationCap size={16} color="#ff4f00" />}>
-          {grades.length === 0
-            ? <Empty msg="No grades recorded yet." />
-            : grades.map((g) => (
-              <Row key={g.id}
-                left={<><span style={{ fontWeight:500 }}>{g.assessment_name}</span><span style={{ color:"#939084" }}> · {g.modules?.name}</span></>}
-                right={<><strong>{g.marks_obtained}/{g.total_marks}</strong> <span style={{ color:"#939084" }}>({Math.round(Number(g.percentage))}%) · {fmtDate(g.date)}</span></>}
-              />
-            ))}
-        </Section>
-
-        {/* Materials */}
-        <Section title="Materials" icon={<FolderOpen size={16} color="#ff4f00" />}>
+        {/* ── Materials ── */}
+        <Section title="Materials" icon={<FolderOpen size={16} color="#ff4f00"/>}>
           {materials.length === 0
             ? <Empty msg="No materials uploaded yet." />
             : materials.map((m) => (
               <Row key={m.id}
                 left={<>
-                  {m.topic && <span style={{ fontSize:11, fontWeight:600, background:"#f3efe9", color:"#605d52", borderRadius:4, padding:"2px 6px", marginRight:6 }}>{m.topic}</span>}
-                  <span style={{ fontWeight:500 }}>{m.file_name}</span>
+                  {m.topic && <Chip>{m.topic}</Chip>}
+                  <strong>{m.file_name}</strong>
                   <span style={{ color:"#939084" }}> · {m.modules?.name}</span>
                 </>}
                 right={
-                  <button onClick={() => downloadMaterial(m.file_path)}
-                    style={{ display:"flex", alignItems:"center", gap:5, fontSize:12, fontWeight:500, color:"#201515", background:"#f3efe9", border:"none", borderRadius:6, padding:"5px 10px", cursor:"pointer" }}>
-                    <Download size={12} /> Download
+                  <button onClick={() => downloadMaterial(m.file_path)} style={s.dlBtn}>
+                    <Download size={12}/> Download
                   </button>
                 }
               />
-            ))}
+            ))
+          }
         </Section>
 
-        {/* Assignments */}
+        {/* ── Assignments ── */}
         <Section title="Assignments" icon={<span style={{ fontSize:15 }}>📋</span>}>
           {assignments.length === 0
             ? <Empty msg="No assignments yet." />
             : assignments.map((a, i) => (
               <Row key={i}
-                left={<><span style={{ fontWeight:500 }}>{a.assignments?.title}</span><span style={{ color:"#939084" }}> · {a.assignments?.modules?.name}</span></>}
+                left={<><strong>{a.assignments?.title}</strong><span style={{ color:"#939084" }}> · {a.assignments?.modules?.name}</span></>}
                 right={
                   <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                    <span style={{
-                      fontSize:11, fontWeight:600, borderRadius:5, padding:"2px 8px",
-                      background: a.status === "completed" ? "#dcfce7" : a.status === "submitted" ? "#e0f2fe" : "#f3efe9",
-                      color: a.status === "completed" ? "#166534" : a.status === "submitted" ? "#0369a1" : "#605d52",
-                    }}>{a.status}</span>
+                    <StatusBadge status={a.status}/>
                     {a.assignments?.due_date && <span style={{ fontSize:11, color:"#939084" }}>Due {fmtDate(a.assignments.due_date)}</span>}
                   </div>
                 }
               />
-            ))}
+            ))
+          }
         </Section>
+
+        {/* ── Teacher Remarks ── */}
+        {remarks.length > 0 && (
+          <Section title="Teacher Remarks" icon={<MessageSquare size={16} color="#ff4f00"/>}>
+            {remarks.map((r) => (
+              <div key={r.id} style={{ padding:"12px 0", borderBottom:"1px solid #f0ece6" }}>
+                <p style={{ fontSize:13, color:"#201515", lineHeight:1.6, marginBottom:4 }}>{r.text}</p>
+                <span style={{ fontSize:11, color:"#aaa69b" }}>{fmtDate(r.created_at)}</span>
+              </div>
+            ))}
+          </Section>
+        )}
       </main>
     </div>
   );
 }
 
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+/* ── Sub-components ── */
+
+function StatCard({ label, value, sub, bar, barColor, badge }: {
+  label: string; value: string; sub?: string;
+  bar?: number; barColor?: string; badge?: React.ReactNode;
+}) {
   return (
     <div style={{ background:"#fff", border:"1px solid #e2ddd6", borderRadius:12, padding:"16px 18px" }}>
       <div style={{ fontSize:11, fontWeight:600, letterSpacing:"0.08em", textTransform:"uppercase", color:"#939084", marginBottom:6 }}>{label}</div>
-      <div style={{ fontSize:26, fontWeight:700, color:"#201515" }}>{value}</div>
+      <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+        <div style={{ fontSize:26, fontWeight:700, color:"#201515" }}>{value}</div>
+        {badge}
+      </div>
       {sub && <div style={{ fontSize:12, color:"#939084", marginTop:2 }}>{sub}</div>}
+      {bar !== undefined && (
+        <div style={{ marginTop:10, height:5, background:"#f3efe9", borderRadius:4, overflow:"hidden" }}>
+          <div style={{ height:"100%", borderRadius:4, width:`${bar}%`, background: barColor ?? "#ff4f00", transition:"width 0.4s" }}/>
+        </div>
+      )}
     </div>
   );
 }
@@ -317,7 +360,7 @@ function Section({ title, icon, children }: { title: string; icon: React.ReactNo
 
 function Row({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {
   return (
-    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, padding:"12px 0", borderBottom:"1px solid #f0ece6", fontSize:13 }}>
+    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, padding:"11px 0", borderBottom:"1px solid #f0ece6", fontSize:13 }}>
       <div style={{ minWidth:0 }}>{left}</div>
       <div style={{ flexShrink:0, color:"#939084", fontSize:12 }}>{right}</div>
     </div>
@@ -327,3 +370,68 @@ function Row({ left, right }: { left: React.ReactNode; right: React.ReactNode })
 function Empty({ msg }: { msg: string }) {
   return <p style={{ fontSize:13, color:"#aaa69b", padding:"14px 0" }}>{msg}</p>;
 }
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return <span style={{ fontSize:11, fontWeight:600, background:"#f3efe9", color:"#605d52", borderRadius:4, padding:"2px 6px", marginRight:6 }}>{children}</span>;
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const cfg: Record<string, { bg: string; color: string }> = {
+    completed: { bg:"#dcfce7", color:"#166534" },
+    submitted: { bg:"#e0f2fe", color:"#0369a1" },
+    pending:   { bg:"#f3efe9", color:"#605d52" },
+  };
+  const c = cfg[status] ?? cfg.pending;
+  return <span style={{ fontSize:11, fontWeight:600, borderRadius:5, padding:"2px 8px", background:c.bg, color:c.color }}>{status}</span>;
+}
+
+function HdrBtn({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+  return (
+    <button onClick={onClick} style={{ display:"flex", alignItems:"center", gap:6, fontSize:12, color:"rgba(255,254,251,0.6)", background:"rgba(255,254,251,0.06)", border:"1px solid rgba(255,254,251,0.1)", borderRadius:7, padding:"6px 12px", cursor:"pointer" }}>
+      {icon} {label}
+    </button>
+  );
+}
+
+function PwField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder: string }) {
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
+      <label style={{ fontSize:13, fontWeight:500, color:"#201515" }}>{label}</label>
+      <input type="password" required minLength={6} placeholder={placeholder} value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{ padding:"10px 13px", fontSize:14, border:"1.5px solid #d1ccc3", borderRadius:8, color:"#201515", fontFamily:"inherit" }} />
+    </div>
+  );
+}
+
+function TrendUp()   { return <span style={{ display:"flex", alignItems:"center", gap:3, fontSize:11, fontWeight:600, color:"#16a34a", background:"#dcfce7", borderRadius:5, padding:"2px 7px" }}><TrendingUp size={11}/> Improving</span>; }
+function TrendDown() { return <span style={{ display:"flex", alignItems:"center", gap:3, fontSize:11, fontWeight:600, color:"#dc2626", background:"#fef2f2", borderRadius:5, padding:"2px 7px" }}><TrendingDown size={11}/> Declining</span>; }
+
+function Spinner() {
+  return (
+    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"#fffefb" }}>
+      <div style={{ width:28, height:28, borderRadius:"50%", border:"2.5px solid #ff4f00", borderTopColor:"transparent", animation:"spin 0.8s linear infinite" }}/>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+
+/* ── Styles ── */
+const s: Record<string, React.CSSProperties> = {
+  page:       { minHeight:"100vh", background:"#fffefb", fontFamily:"'Inter',system-ui,sans-serif" },
+  header:     { background:"#201515", padding:"0 24px" },
+  headerInner:{ maxWidth:800, margin:"0 auto", height:60, display:"flex", alignItems:"center", justifyContent:"space-between" },
+  logoMark:   { width:30, height:30, background:"#ff4f00", borderRadius:7, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 },
+  portalLabel:{ fontSize:11, color:"rgba(255,254,251,0.4)", letterSpacing:"0.08em", textTransform:"uppercase" as const },
+  studentName:{ fontSize:14, fontWeight:600, color:"#fffefb" },
+  main:       { maxWidth:800, margin:"0 auto", padding:"28px 24px" },
+  statsGrid:  { display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:16 },
+  banner:     { background:"#fff8f5", border:"1px solid #ffd4c2", borderRadius:12, padding:"14px 18px", marginBottom:16, display:"flex", alignItems:"center", justifyContent:"space-between", gap:12 },
+  bannerBtn:  { flexShrink:0, fontSize:13, fontWeight:600, color:"#ff4f00", background:"none", border:"1.5px solid #ff4f00", borderRadius:8, padding:"6px 14px", cursor:"pointer" },
+  pwCard:     { background:"#fff", border:"1px solid #e2ddd6", borderRadius:12, padding:24, marginBottom:16 },
+  pwCancel:   { flex:1, padding:"10px", fontSize:14, fontWeight:500, background:"#f3efe9", color:"#201515", border:"none", borderRadius:8, cursor:"pointer" },
+  pwSave:     { flex:2, padding:"10px", fontSize:14, fontWeight:700, background:"#ff4f00", color:"#fff", border:"none", borderRadius:8, cursor:"pointer" },
+  dlBtn:      { display:"flex", alignItems:"center", gap:5, fontSize:12, fontWeight:500, color:"#201515", background:"#f3efe9", border:"none", borderRadius:6, padding:"5px 10px", cursor:"pointer" },
+  errPage:    { minHeight:"100vh", display:"flex", flexDirection:"column" as const, alignItems:"center", justifyContent:"center", background:"#fffefb", padding:24 },
+  signOutLink:{ fontSize:14, color:"#ff4f00", background:"none", border:"none", cursor:"pointer", textDecoration:"underline" },
+};

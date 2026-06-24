@@ -258,9 +258,10 @@ function StudentDialog({
           .eq("id", studentId);
         if (error) throw error;
       } else {
+        const { data: { user } } = await supabase.auth.getUser();
         const { data, error } = await supabase
           .from("students")
-          .insert({ name: name.trim(), email: email || null, phone: phone || null })
+          .insert({ name: name.trim(), email: email || null, phone: phone || null, tutor_id: user?.id })
           .select("id")
           .single();
         if (error) throw error;

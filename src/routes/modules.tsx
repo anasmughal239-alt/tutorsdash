@@ -171,9 +171,10 @@ function ModuleDialog({
           .eq("id", mod.id);
         if (error) throw error;
       } else {
+        const { data: { user } } = await supabase.auth.getUser();
         const { error } = await supabase
           .from("modules")
-          .insert({ name: name.trim(), description: description || null, subject_area: subjectArea || null });
+          .insert({ name: name.trim(), description: description || null, subject_area: subjectArea || null, tutor_id: user?.id });
         if (error) throw error;
       }
     },

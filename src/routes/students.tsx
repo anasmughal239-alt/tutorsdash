@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Pencil, Trash2, Plus, Search } from "lucide-react";
+import { Pencil, Trash2, Plus, Search, Mail } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -156,6 +156,23 @@ function StudentsPage() {
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
+                  {s.email && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title={`Send portal invite to ${s.email}`}
+                      onClick={async () => {
+                        const { error } = await supabase.auth.signInWithOtp({
+                          email: s.email!,
+                          options: { emailRedirectTo: `${window.location.origin}/portal` },
+                        });
+                        if (error) toast.error(error.message);
+                        else toast.success(`Invite sent to ${s.email}`);
+                      }}
+                    >
+                      <Mail className="h-4 w-4 text-primary" />
+                    </Button>
+                  )}
                   <Button
                     size="icon"
                     variant="ghost"

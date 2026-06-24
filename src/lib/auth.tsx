@@ -2,10 +2,13 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
+export type Role = "tutor" | "student" | null; // null = still resolving
+
 interface AuthCtx {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  role: Role;
   signOut: () => Promise<void>;
 }
 
@@ -15,6 +18,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser]       = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [role, setRole]       = useState<Role>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -31,12 +35,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Resolve role after user is known
+  useEffect(() => {
+    if (!user) { setRole(null); return; }
+    supabase
+      .from("students")
+      .select("id")
+      .eq("email", user.email ?? "")
+      .maybeSingle()
+      .then(({ data }) => setRole(data ? "student" : "tutor"));
+  }, [user]);
+
   async function signOut() {
     await supabase.auth.signOut();
+    setRole(null);
   }
 
   return (
-    <Ctx.Provider value={{ user, session, loading, signOut }}>
+    <Ctx.Provider value={{ user, session, loading, role, signOut }}>
       {children}
     </Ctx.Provider>
   );

@@ -7,12 +7,13 @@ import { MobileQuickActions } from "@/components/mobile-quick-actions";
 import { useAuth } from "@/lib/auth";
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, role } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login", replace: true });
-  }, [user, loading, navigate]);
+    if (!loading && user && role === "student") navigate({ to: "/portal", replace: true });
+  }, [user, loading, role, navigate]);
 
   if (loading) {
     return (

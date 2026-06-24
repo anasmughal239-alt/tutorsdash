@@ -85,6 +85,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
 
+      { name: "twitter:title", content: "TutorDash — Tutor Management" },
+      { name: "twitter:description", content: "Manage students, lessons, attendance, grades and materials in one place." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/10b65ab3-e483-4bd9-98f6-e31dfd71cc1d/id-preview-8017d02b--a289dc5b-569a-46c1-a65f-6bddfe0b30fb.lovable.app-1782289865942.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/10b65ab3-e483-4bd9-98f6-e31dfd71cc1d/id-preview-8017d02b--a289dc5b-569a-46c1-a65f-6bddfe0b30fb.lovable.app-1782289865942.png" },
     ],
     links: [
       {

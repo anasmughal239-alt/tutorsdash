@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { MobileQuickActions } from "@/components/mobile-quick-actions";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -19,7 +18,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           <main className="flex-1 p-6 overflow-x-auto">{children}</main>
         </div>
       </div>
-      <MobileQuickActions />
       <Toaster richColors position="top-right" />
     </SidebarProvider>
   );

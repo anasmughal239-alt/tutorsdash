@@ -35,13 +35,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Resolve role after user is known
+  // Resolve role after user is known.
+  // A user is a tutor unless they were added as a student by a DIFFERENT tutor.
+  // Using neq("tutor_id", user.id) excludes rows where the person added themselves
+  // (same email, same uid) — keeps tutors from being mis-classified as students.
   useEffect(() => {
     if (!user) { setRole(null); return; }
     supabase
       .from("students")
-      .select("id")
+      .select("id, tutor_id")
       .eq("email", user.email ?? "")
+      .neq("tutor_id", user.id)
       .maybeSingle()
       .then(({ data }) => setRole(data ? "student" : "tutor"));
   }, [user]);

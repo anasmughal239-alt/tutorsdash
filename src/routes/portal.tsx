@@ -23,7 +23,9 @@ function StudentPortal() {
   const [newPw, setNewPw]           = useState("");
   const [confirmPw, setConfirmPw]   = useState("");
   const [pwBusy, setPwBusy]         = useState(false);
-  const [pwDone, setPwDone]         = useState(false);
+  // Persist across reloads via user metadata
+  const pwDone = !!user?.user_metadata?.has_password;
+  const [pwDoneLocal, setPwDoneLocal] = useState(false);
 
   if (!loading && !user)            { navigate({ to: "/login",     replace: true }); return null; }
   if (!loading && role === "tutor") { navigate({ to: "/dashboard", replace: true }); return null; }
@@ -108,10 +110,13 @@ function StudentPortal() {
     if (newPw !== confirmPw) { toast.error("Passwords don't match"); return; }
     if (newPw.length < 6)    { toast.error("Minimum 6 characters"); return; }
     setPwBusy(true);
-    const { error } = await supabase.auth.updateUser({ password: newPw });
+    const { error } = await supabase.auth.updateUser({
+      password: newPw,
+      data: { has_password: true },
+    });
     setPwBusy(false);
     if (error) { toast.error(error.message); return; }
-    setPwDone(true);
+    setPwDoneLocal(true);
     setShowPwForm(false);
     setNewPw(""); setConfirmPw("");
     toast.success("Password set! Use email + password next time.");
@@ -154,7 +159,7 @@ function StudentPortal() {
             </div>
           </div>
           <div style={{ display:"flex", gap:8 }}>
-            <HdrBtn icon={<KeyRound size={13}/>} label={pwDone ? "Change password" : "Set password"}
+            <HdrBtn icon={<KeyRound size={13}/>} label={(pwDone || pwDoneLocal) ? "Change password" : "Set password"}
               onClick={() => { setShowPwForm(!showPwForm); setPwDone(false); }} />
             <HdrBtn icon={<LogOut size={13}/>} label="Sign out" onClick={() => void signOut()} />
           </div>
@@ -163,7 +168,7 @@ function StudentPortal() {
 
       <main style={s.main}>
         {/* Set-password banner */}
-        {!pwDone && !showPwForm && (
+        {!(pwDone || pwDoneLocal) && !showPwForm && (
           <div style={s.banner}>
             <p style={{ fontSize:13, color:"#7a3a1e" }}>
               <strong>Set a password</strong> so you can log in next time without needing an invite email.
@@ -172,7 +177,7 @@ function StudentPortal() {
           </div>
         )}
 
-        {pwDone && (
+        {(pwDone || pwDoneLocal) && (
           <div style={{ ...s.banner, background:"#f0fdf4", border:"1px solid #bbf7d0" }}>
             <CheckCircle2 size={16} color="#16a34a" style={{ flexShrink:0 }} />
             <p style={{ fontSize:13, color:"#166534" }}>

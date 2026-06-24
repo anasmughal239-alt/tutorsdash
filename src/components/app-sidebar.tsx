@@ -10,10 +10,12 @@ import {
   TrendingUp,
   FolderOpen,
   Zap,
+  LogOut,
 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -22,6 +24,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/lib/auth";
 
 const items = [
   { title: "Dashboard",        url: "/dashboard",        icon: LayoutDashboard },
@@ -37,6 +40,9 @@ const items = [
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { user, signOut } = useAuth();
+
+  const initials = user?.email?.[0]?.toUpperCase() ?? "?";
 
   return (
     <Sidebar collapsible="icon">
@@ -75,6 +81,31 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter>
+        <div className="border-t border-sidebar-border p-2">
+          <button
+            onClick={() => void signOut()}
+            className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors group"
+            title="Sign out"
+          >
+            {/* Avatar circle */}
+            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-sidebar-accent text-sidebar-foreground text-xs font-semibold">
+              {initials}
+            </div>
+            {/* Email + label */}
+            <div className="flex-1 min-w-0 text-left group-data-[collapsible=icon]:hidden">
+              <div className="text-xs font-medium text-sidebar-foreground/80 truncate">
+                {user?.email}
+              </div>
+              <div className="text-[10px] text-sidebar-foreground/40 flex items-center gap-1 mt-0.5">
+                <LogOut className="h-2.5 w-2.5" />
+                Sign out
+              </div>
+            </div>
+          </button>
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }

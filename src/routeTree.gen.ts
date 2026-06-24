@@ -9,38 +9,259 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StudentsRouteImport } from './routes/students'
+import { Route as ProgressReportsRouteImport } from './routes/progress-reports'
+import { Route as ModulesRouteImport } from './routes/modules'
+import { Route as MaterialsRouteImport } from './routes/materials'
+import { Route as LessonsRouteImport } from './routes/lessons'
+import { Route as GradesRouteImport } from './routes/grades'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AttendanceRouteImport } from './routes/attendance'
+import { Route as AssignmentsRouteImport } from './routes/assignments'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StudentsIdRouteImport } from './routes/students.$id'
+import { Route as StudentPortalTokenRouteImport } from './routes/student-portal.$token'
+import { Route as ModulesIdRouteImport } from './routes/modules.$id'
 
+const StudentsRoute = StudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProgressReportsRoute = ProgressReportsRouteImport.update({
+  id: '/progress-reports',
+  path: '/progress-reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModulesRoute = ModulesRouteImport.update({
+  id: '/modules',
+  path: '/modules',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MaterialsRoute = MaterialsRouteImport.update({
+  id: '/materials',
+  path: '/materials',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LessonsRoute = LessonsRouteImport.update({
+  id: '/lessons',
+  path: '/lessons',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GradesRoute = GradesRouteImport.update({
+  id: '/grades',
+  path: '/grades',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AttendanceRoute = AttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssignmentsRoute = AssignmentsRouteImport.update({
+  id: '/assignments',
+  path: '/assignments',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentsIdRoute = StudentsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => StudentsRoute,
+} as any)
+const StudentPortalTokenRoute = StudentPortalTokenRouteImport.update({
+  id: '/student-portal/$token',
+  path: '/student-portal/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModulesIdRoute = ModulesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ModulesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/assignments': typeof AssignmentsRoute
+  '/attendance': typeof AttendanceRoute
+  '/dashboard': typeof DashboardRoute
+  '/grades': typeof GradesRoute
+  '/lessons': typeof LessonsRoute
+  '/materials': typeof MaterialsRoute
+  '/modules': typeof ModulesRouteWithChildren
+  '/progress-reports': typeof ProgressReportsRoute
+  '/students': typeof StudentsRouteWithChildren
+  '/modules/$id': typeof ModulesIdRoute
+  '/student-portal/$token': typeof StudentPortalTokenRoute
+  '/students/$id': typeof StudentsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/assignments': typeof AssignmentsRoute
+  '/attendance': typeof AttendanceRoute
+  '/dashboard': typeof DashboardRoute
+  '/grades': typeof GradesRoute
+  '/lessons': typeof LessonsRoute
+  '/materials': typeof MaterialsRoute
+  '/modules': typeof ModulesRouteWithChildren
+  '/progress-reports': typeof ProgressReportsRoute
+  '/students': typeof StudentsRouteWithChildren
+  '/modules/$id': typeof ModulesIdRoute
+  '/student-portal/$token': typeof StudentPortalTokenRoute
+  '/students/$id': typeof StudentsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/assignments': typeof AssignmentsRoute
+  '/attendance': typeof AttendanceRoute
+  '/dashboard': typeof DashboardRoute
+  '/grades': typeof GradesRoute
+  '/lessons': typeof LessonsRoute
+  '/materials': typeof MaterialsRoute
+  '/modules': typeof ModulesRouteWithChildren
+  '/progress-reports': typeof ProgressReportsRoute
+  '/students': typeof StudentsRouteWithChildren
+  '/modules/$id': typeof ModulesIdRoute
+  '/student-portal/$token': typeof StudentPortalTokenRoute
+  '/students/$id': typeof StudentsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/assignments'
+    | '/attendance'
+    | '/dashboard'
+    | '/grades'
+    | '/lessons'
+    | '/materials'
+    | '/modules'
+    | '/progress-reports'
+    | '/students'
+    | '/modules/$id'
+    | '/student-portal/$token'
+    | '/students/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/assignments'
+    | '/attendance'
+    | '/dashboard'
+    | '/grades'
+    | '/lessons'
+    | '/materials'
+    | '/modules'
+    | '/progress-reports'
+    | '/students'
+    | '/modules/$id'
+    | '/student-portal/$token'
+    | '/students/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/assignments'
+    | '/attendance'
+    | '/dashboard'
+    | '/grades'
+    | '/lessons'
+    | '/materials'
+    | '/modules'
+    | '/progress-reports'
+    | '/students'
+    | '/modules/$id'
+    | '/student-portal/$token'
+    | '/students/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AssignmentsRoute: typeof AssignmentsRoute
+  AttendanceRoute: typeof AttendanceRoute
+  DashboardRoute: typeof DashboardRoute
+  GradesRoute: typeof GradesRoute
+  LessonsRoute: typeof LessonsRoute
+  MaterialsRoute: typeof MaterialsRoute
+  ModulesRoute: typeof ModulesRouteWithChildren
+  ProgressReportsRoute: typeof ProgressReportsRoute
+  StudentsRoute: typeof StudentsRouteWithChildren
+  StudentPortalTokenRoute: typeof StudentPortalTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/students': {
+      id: '/students'
+      path: '/students'
+      fullPath: '/students'
+      preLoaderRoute: typeof StudentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/progress-reports': {
+      id: '/progress-reports'
+      path: '/progress-reports'
+      fullPath: '/progress-reports'
+      preLoaderRoute: typeof ProgressReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modules': {
+      id: '/modules'
+      path: '/modules'
+      fullPath: '/modules'
+      preLoaderRoute: typeof ModulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/materials': {
+      id: '/materials'
+      path: '/materials'
+      fullPath: '/materials'
+      preLoaderRoute: typeof MaterialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lessons': {
+      id: '/lessons'
+      path: '/lessons'
+      fullPath: '/lessons'
+      preLoaderRoute: typeof LessonsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/grades': {
+      id: '/grades'
+      path: '/grades'
+      fullPath: '/grades'
+      preLoaderRoute: typeof GradesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/attendance': {
+      id: '/attendance'
+      path: '/attendance'
+      fullPath: '/attendance'
+      preLoaderRoute: typeof AttendanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assignments': {
+      id: '/assignments'
+      path: '/assignments'
+      fullPath: '/assignments'
+      preLoaderRoute: typeof AssignmentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +269,65 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/students/$id': {
+      id: '/students/$id'
+      path: '/$id'
+      fullPath: '/students/$id'
+      preLoaderRoute: typeof StudentsIdRouteImport
+      parentRoute: typeof StudentsRoute
+    }
+    '/student-portal/$token': {
+      id: '/student-portal/$token'
+      path: '/student-portal/$token'
+      fullPath: '/student-portal/$token'
+      preLoaderRoute: typeof StudentPortalTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modules/$id': {
+      id: '/modules/$id'
+      path: '/$id'
+      fullPath: '/modules/$id'
+      preLoaderRoute: typeof ModulesIdRouteImport
+      parentRoute: typeof ModulesRoute
+    }
   }
 }
 
+interface ModulesRouteChildren {
+  ModulesIdRoute: typeof ModulesIdRoute
+}
+
+const ModulesRouteChildren: ModulesRouteChildren = {
+  ModulesIdRoute: ModulesIdRoute,
+}
+
+const ModulesRouteWithChildren =
+  ModulesRoute._addFileChildren(ModulesRouteChildren)
+
+interface StudentsRouteChildren {
+  StudentsIdRoute: typeof StudentsIdRoute
+}
+
+const StudentsRouteChildren: StudentsRouteChildren = {
+  StudentsIdRoute: StudentsIdRoute,
+}
+
+const StudentsRouteWithChildren = StudentsRoute._addFileChildren(
+  StudentsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AssignmentsRoute: AssignmentsRoute,
+  AttendanceRoute: AttendanceRoute,
+  DashboardRoute: DashboardRoute,
+  GradesRoute: GradesRoute,
+  LessonsRoute: LessonsRoute,
+  MaterialsRoute: MaterialsRoute,
+  ModulesRoute: ModulesRouteWithChildren,
+  ProgressReportsRoute: ProgressReportsRoute,
+  StudentsRoute: StudentsRouteWithChildren,
+  StudentPortalTokenRoute: StudentPortalTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

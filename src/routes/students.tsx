@@ -40,8 +40,14 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/students")({
-  component: StudentsPage,
+  component: StudentsRoute,
 });
+
+function StudentsRoute() {
+  const childMatches = useChildMatches();
+  if (childMatches.length > 0) return <Outlet />;
+  return <StudentsPage />;
+}
 
 type Student = {
   id: string;
@@ -52,9 +58,6 @@ type Student = {
 };
 
 function StudentsPage() {
-  const childMatches = useChildMatches();
-  if (childMatches.length > 0) return <Outlet />;
-
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Student | null>(null);

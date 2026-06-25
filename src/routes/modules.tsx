@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/modules")({
-  component: ModulesPage,
+  component: ModulesRoute,
 });
 
 type Module = {
@@ -42,10 +42,13 @@ type Module = {
   student_modules: { id: string }[];
 };
 
-function ModulesPage() {
+function ModulesRoute() {
   const childMatches = useChildMatches();
   if (childMatches.length > 0) return <Outlet />;
+  return <ModulesPage />;
+}
 
+function ModulesPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Module | null>(null);

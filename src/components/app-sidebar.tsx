@@ -26,16 +26,36 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/lib/auth";
 
-const items = [
-  { title: "Dashboard",        url: "/dashboard",        icon: LayoutDashboard },
-  { title: "Modules",          url: "/modules",          icon: BookOpen },
-  { title: "Students",         url: "/students",         icon: Users },
-  { title: "Lessons",          url: "/lessons",          icon: CalendarDays },
-  { title: "Attendance",       url: "/attendance",       icon: CheckSquare },
-  { title: "Assignments",      url: "/assignments",      icon: ClipboardList },
-  { title: "Grades",           url: "/grades",           icon: GraduationCap },
-  { title: "Progress Reports", url: "/progress-reports", icon: TrendingUp },
-  { title: "Materials",        url: "/materials",        icon: FolderOpen },
+const groups = [
+  {
+    label: "Overview",
+    items: [
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: "Workspace",
+    items: [
+      { title: "Modules",  url: "/modules",  icon: BookOpen },
+      { title: "Students", url: "/students", icon: Users },
+    ],
+  },
+  {
+    label: "Daily",
+    items: [
+      { title: "Lessons",    url: "/lessons",    icon: CalendarDays },
+      { title: "Attendance", url: "/attendance", icon: CheckSquare },
+      { title: "Grades",     url: "/grades",     icon: GraduationCap },
+    ],
+  },
+  {
+    label: "Reports",
+    items: [
+      { title: "Assignments",      url: "/assignments",      icon: ClipboardList },
+      { title: "Progress Reports", url: "/progress-reports", icon: TrendingUp },
+      { title: "Materials",        url: "/materials",        icon: FolderOpen },
+    ],
+  },
 ];
 
 export function AppSidebar() {
@@ -59,27 +79,29 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => {
-                const active =
-                  pathname === item.url || pathname.startsWith(item.url + "/");
-                return (
-                  <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
-                      <Link to={item.url}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {groups.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => {
+                  const active =
+                    pathname === item.url || pathname.startsWith(item.url + "/");
+                  return (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
+                        <Link to={item.url}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
       <SidebarFooter>

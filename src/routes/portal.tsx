@@ -230,7 +230,7 @@ function StudentPortal() {
         {/* ── Results (grades by module) ── */}
         <Section title="Results" icon={<GraduationCap size={16} color="#ff4f00"/>}>
           {grades.length === 0
-            ? <Empty msg="No results recorded yet." />
+            ? <Empty msg="No results yet — your tutor will add these after your first assessment." />
             : Object.entries(gradesByModule).map(([mod, items]) => {
                 const modAvg = Math.round(items.reduce((s, g) => s + Number(g.percentage), 0) / items.length);
                 return (
@@ -276,7 +276,7 @@ function StudentPortal() {
         {/* ── Upcoming lessons ── */}
         <Section title="Upcoming lessons" icon={<CalendarDays size={16} color="#ff4f00"/>}>
           {lessons.length === 0
-            ? <Empty msg="No upcoming lessons." />
+            ? <Empty msg="No lessons scheduled yet — your tutor will add these once sessions are booked." />
             : lessons.map((l) => (
               <Row key={l.id}
                 left={<><strong>{l.topic ?? "Lesson"}</strong><span style={{ color:"#939084" }}> · {l.modules?.name}</span></>}
@@ -289,7 +289,7 @@ function StudentPortal() {
         {/* ── Materials ── */}
         <Section title="Materials" icon={<FolderOpen size={16} color="#ff4f00"/>}>
           {materials.length === 0
-            ? <Empty msg="No materials uploaded yet." />
+            ? <Empty msg="No materials yet — your tutor will upload notes and files here." />
             : materials.map((m) => (
               <Row key={m.id}
                 left={<>
@@ -310,7 +310,7 @@ function StudentPortal() {
         {/* ── Assignments ── */}
         <Section title="Assignments" icon={<span style={{ fontSize:15 }}>📋</span>}>
           {assignments.length === 0
-            ? <Empty msg="No assignments yet." />
+            ? <Empty msg="No assignments yet — they'll appear here once your tutor creates them." />
             : assignments.map((a, i) => (
               <Row key={i}
                 left={<><strong>{a.assignments?.title}</strong><span style={{ color:"#939084" }}> · {a.assignments?.modules?.name}</span></>}

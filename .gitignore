@@ -20,6 +20,9 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Vercel agent skills (auto-generated, not app code)
+.agents/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

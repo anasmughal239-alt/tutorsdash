@@ -87,8 +87,9 @@ function StudentDetail() {
   const addRemark = useMutation({
     mutationFn: async () => {
       if (!remarkText.trim()) return;
+      const { data: { user } } = await supabase.auth.getUser();
       const { error } = await supabase
-        .from("remarks").insert({ student_id: id, text: remarkText.trim() });
+        .from("remarks").insert({ student_id: id, text: remarkText.trim(), tutor_id: user!.id });
       if (error) throw error;
     },
     onSuccess: () => {

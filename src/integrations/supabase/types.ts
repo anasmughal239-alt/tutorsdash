@@ -235,6 +235,7 @@ export type Database = {
           id: string
           name: string
           subject_area: string | null
+          tutor_id: string | null
         }
         Insert: {
           created_at?: string
@@ -242,6 +243,7 @@ export type Database = {
           id?: string
           name: string
           subject_area?: string | null
+          tutor_id?: string | null
         }
         Update: {
           created_at?: string
@@ -249,6 +251,7 @@ export type Database = {
           id?: string
           name?: string
           subject_area?: string | null
+          tutor_id?: string | null
         }
         Relationships: []
       }
@@ -330,6 +333,38 @@ export type Database = {
           },
         ]
       }
+      remarks: {
+        Row: {
+          created_at: string
+          id: string
+          student_id: string
+          text: string
+          tutor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          student_id: string
+          text: string
+          tutor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          student_id?: string
+          text?: string
+          tutor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remarks_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       students: {
         Row: {
           created_at: string
@@ -338,6 +373,7 @@ export type Database = {
           name: string
           phone: string | null
           share_token: string
+          tutor_id: string | null
         }
         Insert: {
           created_at?: string
@@ -346,6 +382,7 @@ export type Database = {
           name: string
           phone?: string | null
           share_token?: string
+          tutor_id?: string | null
         }
         Update: {
           created_at?: string
@@ -354,6 +391,7 @@ export type Database = {
           name?: string
           phone?: string | null
           share_token?: string
+          tutor_id?: string | null
         }
         Relationships: []
       }

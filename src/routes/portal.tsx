@@ -160,7 +160,7 @@ function StudentPortal() {
           </div>
           <div style={{ display:"flex", gap:8 }}>
             <HdrBtn icon={<KeyRound size={13}/>} label={(pwDone || pwDoneLocal) ? "Change password" : "Set password"}
-              onClick={() => { setShowPwForm(!showPwForm); setPwDone(false); }} />
+              onClick={() => setShowPwForm(!showPwForm)} />
             <HdrBtn icon={<LogOut size={13}/>} label="Sign out" onClick={() => void signOut()} />
           </div>
         </div>

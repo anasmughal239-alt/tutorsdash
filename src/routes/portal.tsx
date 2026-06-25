@@ -30,7 +30,7 @@ function StudentPortal() {
   if (!loading && !user)            { navigate({ to: "/login",     replace: true }); return null; }
   if (!loading && role === "tutor") { navigate({ to: "/dashboard", replace: true }); return null; }
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["portal", user?.email],
     enabled: !!user?.email,
     queryFn: async () => {
@@ -124,6 +124,18 @@ function StudentPortal() {
 
   if (loading || isLoading) return <Spinner />;
 
+  if (isError) return (
+    <div style={s.errPage}>
+      <p style={{ fontSize:18, fontWeight:600, color:"#201515", marginBottom:8 }}>Could not load your data</p>
+      <p style={{ fontSize:14, color:"#939084", marginBottom:24, textAlign:"center" }}>
+        Check your connection and try again.
+      </p>
+      <button onClick={() => void refetch()} style={{ ...s.signOutLink, background:"#201515", color:"#fff", padding:"10px 24px", borderRadius:8, border:"none", cursor:"pointer", fontWeight:600 }}>
+        Retry
+      </button>
+    </div>
+  );
+
   if (!data) return (
     <div style={s.errPage}>
       <p style={{ fontSize:18, fontWeight:600, color:"#201515", marginBottom:8 }}>Not registered as a student</p>
@@ -148,6 +160,7 @@ function StudentPortal() {
 
   return (
     <div style={s.page}>
+      <style>{`@media (max-width:480px){.td-stats-grid{grid-template-columns:repeat(2,1fr)!important}}`}</style>
       {/* Header */}
       <header style={s.header}>
         <div style={s.headerInner}>
@@ -204,7 +217,7 @@ function StudentPortal() {
         )}
 
         {/* ── Stats strip ── */}
-        <div style={s.statsGrid}>
+        <div style={s.statsGrid} className="td-stats-grid">
           <StatCard label="Attendance" value={`${attendance.pct}%`} sub={`${attendance.present}/${attendance.total} sessions`} bar={attendance.pct} barColor="#ff4f00" />
           <StatCard label="Overall grade" value={`${avg}%`} sub={letterGrade(avg)}
             bar={avg}

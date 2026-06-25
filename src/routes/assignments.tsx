@@ -17,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { humanizeError } from "@/lib/errors";
 import { fmtDate } from "@/lib/format";
 
 export const Route = createFileRoute("/assignments")({
@@ -178,7 +179,7 @@ function AssignmentDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
       onOpenChange(false);
       setTitle(""); setDescription(""); setDueDate("");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanizeError(e)),
   });
 
   return (

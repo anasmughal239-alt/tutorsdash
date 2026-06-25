@@ -24,8 +24,9 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Pencil, Trash2, Plus, Search, Mail } from "lucide-react";
+import { Pencil, Trash2, Plus, Search, Mail, Users } from "lucide-react";
 import { toast } from "sonner";
+import { humanizeError } from "@/lib/errors";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -77,7 +78,7 @@ function StudentsPage() {
       toast.success("Student deleted");
       qc.invalidateQueries({ queryKey: ["students"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanizeError(e)),
   });
 
   const filtered = (students ?? []).filter(
@@ -125,10 +126,38 @@ function StudentsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.length === 0 && (
+            {/* Skeleton rows while loading */}
+            {students === undefined && Array.from({ length: 4 }).map((_, i) => (
+              <TableRow key={i}>
+                {Array.from({ length: 5 }).map((_, j) => (
+                  <TableCell key={j}>
+                    <div className="h-4 rounded bg-muted animate-pulse" style={{ width: `${[60, 80, 50, 70, 40][j]}%` }} />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+            {/* Empty state */}
+            {students !== undefined && filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
-                  No students yet. Click "Add student" to create one.
+                <TableCell colSpan={5}>
+                  <div className="flex flex-col items-center gap-3 py-14 text-center">
+                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                      <Users className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm text-foreground">
+                        {search ? "No students match your search" : "No students yet"}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {search ? "Try a different name or email." : "Add your first student to get started."}
+                      </p>
+                    </div>
+                    {!search && (
+                      <Button size="sm" onClick={() => { setEditing(null); setOpen(true); }}>
+                        <Plus className="h-3.5 w-3.5 mr-1" /> Add student
+                      </Button>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             )}
@@ -280,8 +309,10 @@ function StudentDialog({
       qc.invalidateQueries({ queryKey: ["students"] });
       onOpenChange(false);
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanizeError(e)),
   });
+
+  const nameError = name.length > 0 && !name.trim() ? "Name can't be blank." : "";
 
   return (
     <Dialog
@@ -303,7 +334,13 @@ function StudentDialog({
         <div className="space-y-4">
           <div>
             <Label htmlFor="name">Name *</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={nameError ? "border-destructive focus-visible:ring-destructive" : ""}
+            />
+            {nameError && <p className="text-xs text-destructive mt-1">{nameError}</p>}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>

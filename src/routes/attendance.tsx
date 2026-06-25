@@ -10,6 +10,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { humanizeError } from "@/lib/errors";
 import { fmtDateTime } from "@/lib/format";
 
 export const Route = createFileRoute("/attendance")({
@@ -103,7 +104,7 @@ function AttendancePage() {
       qc.invalidateQueries({ queryKey: ["attendance-for-lesson", lessonId] });
       qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanizeError(e)),
   });
 
   return (

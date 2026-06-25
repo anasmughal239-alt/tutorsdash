@@ -7,8 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fmtDate, fmtDateTime, letterGrade } from "@/lib/format";
-import { Mail, MessageSquarePlus, Trash2 } from "lucide-react";
+import { Mail, MessageSquarePlus, Trash2, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
+import { humanizeError } from "@/lib/errors";
 
 export const Route = createFileRoute("/students/$id")({
   component: StudentDetail,
@@ -95,7 +96,7 @@ function StudentDetail() {
       setRemarkText("");
       qc.invalidateQueries({ queryKey: ["student-remarks", id] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanizeError(e)),
   });
 
   const deleteRemark = useMutation({
@@ -131,6 +132,12 @@ function StudentDetail() {
 
   return (
     <AppShell>
+      <Link
+        to="/students"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
+      >
+        <ChevronLeft className="h-4 w-4" /> All students
+      </Link>
       <PageHeader
         title={student.name}
         eyebrow="Student"
@@ -285,9 +292,6 @@ function StudentDetail() {
         </CardContent>
       </Card>
 
-      <div className="mt-6">
-        <Link to="/students" className="text-sm text-primary hover:underline">← All students</Link>
-      </div>
     </AppShell>
   );
 }

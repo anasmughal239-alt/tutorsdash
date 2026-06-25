@@ -16,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Upload, Download, Trash2, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { humanizeError } from "@/lib/errors";
 import { fmtBytes, fmtDate } from "@/lib/format";
 
 export const Route = createFileRoute("/materials")({
@@ -188,7 +189,7 @@ function UploadDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v:
       onOpenChange(false);
       setFile(null); setTopic("");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanizeError(e)),
   });
 
   return (

@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { humanizeError } from "@/lib/errors";
 import { fmtDate, letterGrade } from "@/lib/format";
 
 export const Route = createFileRoute("/grades")({
@@ -161,7 +162,7 @@ function GradeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: 
       onOpenChange(false);
       setName(""); setObtained(""); setTotal("100");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanizeError(e)),
   });
 
   return (

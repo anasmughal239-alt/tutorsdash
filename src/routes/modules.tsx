@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Users, BookOpen } from "lucide-react";
 import { toast } from "sonner";
+import { humanizeError } from "@/lib/errors";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -67,7 +68,7 @@ function ModulesPage() {
       toast.success("Module deleted");
       qc.invalidateQueries({ queryKey: ["modules-list"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanizeError(e)),
   });
 
   return (
@@ -184,7 +185,7 @@ function ModuleDialog({
       qc.invalidateQueries({ queryKey: ["modules"] });
       onOpenChange(false);
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(humanizeError(e)),
   });
 
   return (

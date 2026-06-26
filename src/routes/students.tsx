@@ -6,13 +6,13 @@ import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Table,
@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Pencil, Trash2, Plus, Search, Mail, Users, X, Sheet } from "lucide-react";
+import { Pencil, Trash2, Plus, Search, Mail, Users, X, Sheet, GraduationCap, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { humanizeError } from "@/lib/errors";
 import {
@@ -38,6 +38,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/students")({
   component: StudentsRoute,
@@ -63,6 +66,10 @@ function StudentsPage() {
   const [editing, setEditing] = useState<Student | null>(null);
   const [open, setOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkWaOpen, setBulkWaOpen] = useState(false);
+  const [quickGradeStudent, setQuickGradeStudent] = useState<Student | null>(null);
+  const [quickGradeOpen, setQuickGradeOpen] = useState(false);
 
   const { data: students } = useQuery({
     queryKey: ["students"],
@@ -93,6 +100,34 @@ function StudentsPage() {
       s.name.toLowerCase().includes(search.toLowerCase()) ||
       (s.email ?? "").toLowerCase().includes(search.toLowerCase()),
   );
+
+  const allSelected = filtered.length > 0 && filtered.every((s) => selected.has(s.id));
+
+  function toggleAll() {
+    if (allSelected) {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        filtered.forEach((s) => next.delete(s.id));
+        return next;
+      });
+    } else {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        filtered.forEach((s) => next.add(s.id));
+        return next;
+      });
+    }
+  }
+
+  function toggleOne(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  const selectedStudents = (students ?? []).filter((s) => selected.has(s.id));
 
   return (
     <AppShell>
@@ -125,6 +160,13 @@ function StudentsPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-10">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={toggleAll}
+                  aria-label="Select all"
+                />
+              </TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
@@ -136,9 +178,9 @@ function StudentsPage() {
             {/* Skeleton rows while loading */}
             {students === undefined && Array.from({ length: 4 }).map((_, i) => (
               <TableRow key={i}>
-                {Array.from({ length: 5 }).map((_, j) => (
+                {Array.from({ length: 6 }).map((_, j) => (
                   <TableCell key={j}>
-                    <div className="h-4 rounded bg-muted animate-pulse" style={{ width: `${[60, 80, 50, 70, 40][j]}%` }} />
+                    <div className="h-4 rounded bg-muted animate-pulse" style={{ width: `${[20, 60, 80, 50, 70, 40][j]}%` }} />
                   </TableCell>
                 ))}
               </TableRow>
@@ -146,7 +188,7 @@ function StudentsPage() {
             {/* Empty state */}
             {students !== undefined && filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5}>
+                <TableCell colSpan={6}>
                   <div className="flex flex-col items-center gap-3 py-14 text-center">
                     <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
                       <Users className="h-6 w-6 text-muted-foreground" />
@@ -169,7 +211,14 @@ function StudentsPage() {
               </TableRow>
             )}
             {filtered.map((s) => (
-              <TableRow key={s.id}>
+              <TableRow key={s.id} className={selected.has(s.id) ? "bg-primary/5" : ""}>
+                <TableCell>
+                  <Checkbox
+                    checked={selected.has(s.id)}
+                    onCheckedChange={() => toggleOne(s.id)}
+                    aria-label={`Select ${s.name}`}
+                  />
+                </TableCell>
                 <TableCell>
                   <Link to="/students/$id" params={{ id: s.id }} className="font-medium hover:underline">
                     {s.name}
@@ -212,6 +261,17 @@ function StudentsPage() {
                   <Button
                     size="icon"
                     variant="ghost"
+                    title="Quick grade entry"
+                    onClick={() => {
+                      setQuickGradeStudent(s);
+                      setQuickGradeOpen(true);
+                    }}
+                  >
+                    <GraduationCap className="h-4 w-4 text-primary" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
                     onClick={() => {
                       setEditing(s);
                       setOpen(true);
@@ -245,9 +305,250 @@ function StudentsPage() {
         </Table>
       </div>
 
+      {/* Floating action bar */}
+      {selected.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl border border-border bg-card shadow-lg px-5 py-3">
+          <span className="text-sm font-medium text-foreground">
+            {selected.size} student{selected.size !== 1 ? "s" : ""} selected
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setBulkWaOpen(true)}
+          >
+            <MessageSquare className="h-4 w-4 mr-1.5" /> WhatsApp message
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setSelected(new Set())}
+          >
+            <X className="h-4 w-4 mr-1" /> Clear
+          </Button>
+        </div>
+      )}
+
       <StudentDialog open={open} onOpenChange={setOpen} student={editing} />
       <BulkImportDialog open={importOpen} onOpenChange={setImportOpen} />
+      <BulkWhatsAppDialog
+        open={bulkWaOpen}
+        onOpenChange={setBulkWaOpen}
+        students={selectedStudents}
+      />
+      <QuickGradeDialog
+        open={quickGradeOpen}
+        onOpenChange={setQuickGradeOpen}
+        student={quickGradeStudent}
+      />
     </AppShell>
+  );
+}
+
+/* ── BulkWhatsAppDialog ── */
+function BulkWhatsAppDialog({
+  open,
+  onOpenChange,
+  students,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  students: Student[];
+}) {
+  const [message, setMessage] = useState("Hello! Just checking in regarding your lessons. Please let me know if you have any questions.");
+  const withPhone = students.filter((s) => s.phone);
+  const withoutPhone = students.filter((s) => !s.phone);
+
+  function sendAll() {
+    for (const s of withPhone) {
+      const phone = s.phone!.replace(/\D/g, "");
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
+    }
+    if (withPhone.length > 0) toast.success(`Opened WhatsApp for ${withPhone.length} student${withPhone.length !== 1 ? "s" : ""}`);
+    onOpenChange(false);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>WhatsApp bulk message</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label className="text-sm font-medium">Selected students</Label>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {students.map((s) => (
+                <Badge key={s.id} variant={s.phone ? "secondary" : "outline"} className={!s.phone ? "opacity-50" : ""}>
+                  {s.name}{!s.phone && " (no phone)"}
+                </Badge>
+              ))}
+            </div>
+          </div>
+          {withoutPhone.length > 0 && (
+            <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+              {withoutPhone.length} student{withoutPhone.length !== 1 ? "s" : ""} without a phone number will be skipped.
+            </p>
+          )}
+          <div>
+            <Label htmlFor="wa-message">Message</Label>
+            <Textarea
+              id="wa-message"
+              rows={4}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="mt-1.5"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={sendAll} disabled={withPhone.length === 0}>
+            Send to {withPhone.length} student{withPhone.length !== 1 ? "s" : ""}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ── QuickGradeDialog ── */
+function QuickGradeDialog({
+  open,
+  onOpenChange,
+  student,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  student: Student | null;
+}) {
+  const qc = useQueryClient();
+  const [assessment, setAssessment] = useState("");
+  const [obtained, setObtained] = useState("");
+  const [total, setTotal] = useState("100");
+  const [moduleId, setModuleId] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+
+  const { data: modules } = useQuery({
+    queryKey: ["modules-min"],
+    queryFn: async () => {
+      const { data } = await supabase.from("modules").select("id,name").order("name");
+      return (data ?? []) as { id: string; name: string }[];
+    },
+  });
+
+  const save = useMutation({
+    mutationFn: async () => {
+      if (!student) throw new Error("No student");
+      if (!assessment.trim()) throw new Error("Assessment name is required");
+      if (!obtained || !total) throw new Error("Marks are required");
+      const { data: { user } } = await supabase.auth.getUser();
+      const pct = (parseFloat(obtained) / parseFloat(total)) * 100;
+      const { error } = await supabase.from("grades").insert({
+        student_id: student.id,
+        assessment_name: assessment.trim(),
+        marks_obtained: parseFloat(obtained),
+        total_marks: parseFloat(total),
+        percentage: pct,
+        date,
+        module_id: moduleId || null,
+        tutor_id: user?.id ?? null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Grade saved");
+      qc.invalidateQueries({ queryKey: ["grades"] });
+      if (student) qc.invalidateQueries({ queryKey: ["student-grades", student.id] });
+      onOpenChange(false);
+      setAssessment(""); setObtained(""); setTotal("100"); setModuleId("");
+      setDate(new Date().toISOString().slice(0, 10));
+    },
+    onError: (e: Error) => toast.error(humanizeError(e)),
+  });
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) { setAssessment(""); setObtained(""); setTotal("100"); setModuleId(""); setDate(new Date().toISOString().slice(0, 10)); }
+        onOpenChange(v);
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Quick grade entry</DialogTitle>
+        </DialogHeader>
+        {student && (
+          <p className="text-sm font-medium text-foreground -mt-1">
+            Student: <span className="text-primary">{student.name}</span>
+          </p>
+        )}
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="qg-assessment">Assessment name *</Label>
+            <Input
+              id="qg-assessment"
+              value={assessment}
+              onChange={(e) => setAssessment(e.target.value)}
+              placeholder="e.g. Mock Test 1"
+              autoFocus
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="qg-obtained">Marks obtained *</Label>
+              <Input
+                id="qg-obtained"
+                type="number"
+                min="0"
+                value={obtained}
+                onChange={(e) => setObtained(e.target.value)}
+                placeholder="e.g. 78"
+              />
+            </div>
+            <div>
+              <Label htmlFor="qg-total">Total marks</Label>
+              <Input
+                id="qg-total"
+                type="number"
+                min="1"
+                value={total}
+                onChange={(e) => setTotal(e.target.value)}
+              />
+            </div>
+          </div>
+          <div>
+            <Label>Module (optional)</Label>
+            <Select value={moduleId} onValueChange={setModuleId}>
+              <SelectTrigger><SelectValue placeholder="Select a module" /></SelectTrigger>
+              <SelectContent>
+                {modules?.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="qg-date">Date</Label>
+            <Input
+              id="qg-date"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
+          {obtained && total && (
+            <p className="text-xs text-muted-foreground">
+              Percentage: {Math.round((parseFloat(obtained) / parseFloat(total)) * 100)}%
+            </p>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={() => save.mutate()} disabled={save.isPending}>
+            {save.isPending ? "Saving…" : "Save grade"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

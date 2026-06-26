@@ -18,11 +18,49 @@ export const Route = createFileRoute("/attendance")({
 });
 
 type Status = "present" | "absent" | "late";
+type CycleStatus = Status | "none";
+
+const CYCLE: CycleStatus[] = ["none", "present", "absent", "late"];
+
+const STATUS_STYLES: Record<CycleStatus, string> = {
+  none: "border-border bg-card hover:border-foreground/30 hover:bg-muted/30",
+  present: "border-green-500 bg-green-50",
+  absent: "border-red-500 bg-red-50",
+  late: "border-amber-500 bg-amber-50",
+};
+
+const STATUS_LABEL: Record<CycleStatus, string> = {
+  none: "Not marked",
+  present: "Present",
+  absent: "Absent",
+  late: "Late",
+};
+
+const STATUS_TEXT: Record<CycleStatus, string> = {
+  none: "text-muted-foreground",
+  present: "text-green-700",
+  absent: "text-red-700",
+  late: "text-amber-700",
+};
+
+// Generate initials avatar color based on name
+function avatarColor(name: string) {
+  const colors = [
+    "#ff4f00", "#16a34a", "#2563eb", "#9333ea", "#db2777", "#0891b2", "#d97706",
+  ];
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % colors.length;
+  return colors[h];
+}
+
+function initials(name: string) {
+  return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+}
 
 function AttendancePage() {
   const qc = useQueryClient();
   const [lessonId, setLessonId] = useState("");
-  const [marks, setMarks] = useState<Record<string, Status>>({});
+  const [marks, setMarks] = useState<Record<string, CycleStatus>>({});
 
   const { data: lessons } = useQuery({
     queryKey: ["lessons-for-attendance"],
@@ -42,7 +80,6 @@ function AttendancePage() {
 
   const selectedLesson = lessons?.find((l) => l.id === lessonId);
 
-  // students in lesson's module (or just the lesson's single student)
   const { data: lessonStudents } = useQuery({
     queryKey: ["lesson-students", lessonId, selectedLesson?.module_id, selectedLesson?.student_id],
     enabled: !!selectedLesson,
@@ -66,7 +103,6 @@ function AttendancePage() {
     },
   });
 
-  // existing attendance for the lesson
   const { data: existing } = useQuery({
     queryKey: ["attendance-for-lesson", lessonId],
     enabled: !!lessonId,
@@ -81,18 +117,34 @@ function AttendancePage() {
 
   useEffect(() => {
     if (existing) {
-      const m: Record<string, Status> = {};
+      const m: Record<string, CycleStatus> = {};
       existing.forEach((r) => { m[r.student_id] = r.status; });
       setMarks(m);
     }
   }, [existing, lessonId]);
 
+  function cycleStatus(studentId: string) {
+    const current: CycleStatus = marks[studentId] ?? "none";
+    const idx = CYCLE.indexOf(current);
+    const next = CYCLE[(idx + 1) % CYCLE.length];
+    setMarks((m) => ({ ...m, [studentId]: next }));
+  }
+
+  function markAllPresent() {
+    if (!lessonStudents) return;
+    const m: Record<string, CycleStatus> = {};
+    lessonStudents.forEach((s) => { m[s.id] = "present"; });
+    setMarks(m);
+  }
+
   const save = useMutation({
     mutationFn: async () => {
       if (!lessonId) throw new Error("Pick a lesson");
-      const rows = Object.entries(marks).map(([student_id, status]) => ({
-        lesson_id: lessonId, student_id, status,
-      }));
+      const rows = Object.entries(marks)
+        .filter(([, status]) => status !== "none")
+        .map(([student_id, status]) => ({
+          lesson_id: lessonId, student_id, status: status as Status,
+        }));
       if (rows.length === 0) return;
       const { error } = await supabase
         .from("attendance")
@@ -109,7 +161,7 @@ function AttendancePage() {
 
   return (
     <AppShell>
-      <PageHeader title="Attendance" description="Mark attendance per lesson." />
+      <PageHeader title="Attendance" description="Tap a card to cycle through attendance status." />
       <Card className="mb-6">
         <CardContent className="pt-6 space-y-4">
           <div>
@@ -131,31 +183,48 @@ function AttendancePage() {
       {selectedLesson && (
         <Card>
           <CardContent className="pt-6">
-            <h3 className="font-semibold mb-4">Mark attendance — {selectedLesson.modules?.name ?? selectedLesson.topic}</h3>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-semibold">
+                Mark attendance — {selectedLesson.modules?.name ?? selectedLesson.topic}
+              </h3>
+              {lessonStudents && lessonStudents.length > 0 && (
+                <Button size="sm" variant="outline" onClick={markAllPresent}>
+                  Mark all present
+                </Button>
+              )}
+            </div>
+
             {(!lessonStudents || lessonStudents.length === 0) && (
               <p className="text-sm text-muted-foreground">No students linked to this lesson.</p>
             )}
-            <ul className="space-y-2">
-              {lessonStudents?.map((s) => (
-                <li key={s.id} className="flex items-center justify-between border-b pb-3 last:border-0">
-                  <span className="font-medium">{s.name}</span>
-                  <div className="flex gap-2">
-                    {(["present", "absent", "late"] as Status[]).map((st) => (
-                      <Button
-                        key={st}
-                        size="sm"
-                        variant={marks[s.id] === st ? "default" : "outline"}
-                        onClick={() => setMarks((m) => ({ ...m, [s.id]: st }))}
-                        className="capitalize"
-                      >
-                        {st}
-                      </Button>
-                    ))}
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-6 flex justify-end">
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+              {lessonStudents?.map((s) => {
+                const status: CycleStatus = marks[s.id] ?? "none";
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => cycleStatus(s.id)}
+                    className={`relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all cursor-pointer select-none ${STATUS_STYLES[status]}`}
+                  >
+                    <div
+                      className="flex h-11 w-11 items-center justify-center rounded-full text-white text-sm font-bold flex-shrink-0"
+                      style={{ background: avatarColor(s.name) }}
+                    >
+                      {initials(s.name)}
+                    </div>
+                    <div className="text-center">
+                      <div className="font-medium text-sm text-foreground leading-tight">{s.name}</div>
+                      <div className={`text-xs mt-0.5 font-medium ${STATUS_TEXT[status]}`}>
+                        {STATUS_LABEL[status]}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex justify-end">
               <Button onClick={() => save.mutate()} disabled={save.isPending || !lessonStudents?.length}>
                 {save.isPending ? "Saving…" : "Save attendance"}
               </Button>

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fmtDate, fmtDateTime, letterGrade } from "@/lib/format";
-import { Mail, MessageSquarePlus, Trash2, ChevronLeft, Share2, FileDown } from "lucide-react";
+import { Mail, MessageSquarePlus, Trash2, ChevronLeft, Share2, FileDown, FileImage } from "lucide-react";
 import { toast } from "sonner";
 import { humanizeError } from "@/lib/errors";
 import jsPDF from "jspdf";
@@ -216,6 +216,122 @@ function StudentDetail() {
     toast.success("Report downloaded");
   };
 
+  const shareProgressCard = () => {
+    if (!student) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = 800;
+    canvas.height = 420;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Left half — dark
+    ctx.fillStyle = "#201515";
+    ctx.fillRect(0, 0, 400, 420);
+
+    // Right half — cream
+    ctx.fillStyle = "#fffefb";
+    ctx.fillRect(400, 0, 400, 420);
+
+    // Left: "TutorDash" orange label
+    ctx.fillStyle = "#ff4f00";
+    ctx.font = "bold 16px sans-serif";
+    ctx.fillText("TutorDash", 28, 44);
+
+    // Left: student name
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 32px sans-serif";
+    const nameLine = student.name.length > 18 ? student.name.slice(0, 18) + "…" : student.name;
+    ctx.fillText(nameLine, 28, 110);
+
+    // Left: email
+    ctx.fillStyle = "rgba(255,254,251,0.55)";
+    ctx.font = "14px sans-serif";
+    ctx.fillText(student.email ?? "No email on file", 28, 136);
+
+    // Left: module chips
+    const moduleNames = student.student_modules.map((sm) => sm.modules?.name).filter(Boolean) as string[];
+    let chipX = 28;
+    let chipY = 172;
+    ctx.font = "bold 11px sans-serif";
+    for (const mod of moduleNames.slice(0, 4)) {
+      const tw = ctx.measureText(mod).width + 20;
+      if (chipX + tw > 380) { chipX = 28; chipY += 30; }
+      ctx.fillStyle = "#ff4f00";
+      ctx.beginPath();
+      ctx.roundRect(chipX, chipY - 14, tw, 22, 6);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(mod, chipX + 10, chipY + 3);
+      chipX += tw + 8;
+    }
+    if (moduleNames.length === 0) {
+      ctx.fillStyle = "rgba(255,254,251,0.35)";
+      ctx.font = "13px sans-serif";
+      ctx.fillText("No modules assigned", 28, 185);
+    }
+
+    // Left: bottom decoration line
+    ctx.fillStyle = "#ff4f00";
+    ctx.fillRect(28, 390, 60, 3);
+
+    // Right: attendance %
+    ctx.fillStyle = "#201515";
+    ctx.font = "bold 72px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(`${attPct}%`, 600, 120);
+    ctx.font = "13px sans-serif";
+    ctx.fillStyle = "#888";
+    ctx.fillText("Attendance", 600, 145);
+    ctx.fillText(`${attPresent} of ${attTotal} sessions`, 600, 165);
+
+    // Right: attendance bar
+    ctx.fillStyle = "#e5e1da";
+    ctx.beginPath();
+    ctx.roundRect(440, 185, 320, 10, 5);
+    ctx.fill();
+    if (attPct > 0) {
+      ctx.fillStyle = "#ff4f00";
+      ctx.beginPath();
+      ctx.roundRect(440, 185, Math.round(320 * attPct / 100), 10, 5);
+      ctx.fill();
+    }
+
+    // Right: avg grade
+    ctx.fillStyle = "#201515";
+    ctx.font = "bold 48px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(`${avgGrade}%`, 600, 272);
+    ctx.font = "bold 22px sans-serif";
+    ctx.fillStyle = "#ff4f00";
+    ctx.fillText(letterGrade(avgGrade), 600, 300);
+    ctx.font = "13px sans-serif";
+    ctx.fillStyle = "#888";
+    ctx.fillText("Average Grade", 600, 320);
+
+    // Right: grade bar
+    ctx.fillStyle = "#e5e1da";
+    ctx.beginPath();
+    ctx.roundRect(440, 340, 320, 10, 5);
+    ctx.fill();
+    if (avgGrade > 0) {
+      const gradeColor = avgGrade >= 70 ? "#16a34a" : avgGrade >= 50 ? "#ff4f00" : "#dc2626";
+      ctx.fillStyle = gradeColor;
+      ctx.beginPath();
+      ctx.roundRect(440, 340, Math.round(320 * avgGrade / 100), 10, 5);
+      ctx.fill();
+    }
+
+    // Right: footer date
+    ctx.fillStyle = "#aaa";
+    ctx.font = "11px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(`Generated on ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`, 600, 400);
+
+    const dataUrl = canvas.toDataURL("image/png");
+    window.open(dataUrl, "_blank");
+    toast.success("Progress card opened in new tab");
+  };
+
   if (!student) return (
     <AppShell><PageHeader title="Student" /><p className="text-muted-foreground">Loading…</p></AppShell>
   );
@@ -242,6 +358,9 @@ function StudentDetail() {
           <div className="flex gap-2 flex-wrap">
             <Button variant="outline" onClick={downloadReport}>
               <FileDown className="h-4 w-4 mr-1.5" /> Download report
+            </Button>
+            <Button variant="outline" onClick={shareProgressCard}>
+              <FileImage className="h-4 w-4 mr-1.5" /> Share card
             </Button>
             {student.share_token && (
               <Button variant="outline" onClick={shareWhatsApp}>

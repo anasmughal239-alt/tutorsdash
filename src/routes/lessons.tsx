@@ -30,6 +30,16 @@ export const Route = createFileRoute("/lessons")({
   component: LessonsPage,
 });
 
+/* ── Lesson template helpers ── */
+const TEMPLATES_KEY = "tutordash:lesson-templates";
+type Template = { name: string; topic: string; notes: string; moduleId: string };
+function getTemplates(): Template[] {
+  try { return JSON.parse(localStorage.getItem(TEMPLATES_KEY) ?? "[]"); } catch { return []; }
+}
+function addTemplate(t: Template) {
+  localStorage.setItem(TEMPLATES_KEY, JSON.stringify([...getTemplates().filter((x) => x.name !== t.name), t]));
+}
+
 type Lesson = {
   id: string;
   lesson_date: string;
@@ -169,6 +179,9 @@ function LessonDialog({
   const [time, setTime] = useState("");
   const [topic, setTopic] = useState("");
   const [notes, setNotes] = useState("");
+  const [templates, setTemplates] = useState<Template[]>(() => getTemplates());
+  const [savingTemplate, setSavingTemplate] = useState(false);
+  const [templateName, setTemplateName] = useState("");
 
   const { data: students } = useQuery({
     queryKey: ["students-min"],
@@ -230,6 +243,9 @@ function LessonDialog({
           }
           setTopic(lesson?.topic ?? "");
           setNotes(lesson?.notes ?? "");
+          setTemplates(getTemplates());
+          setSavingTemplate(false);
+          setTemplateName("");
         }
         onOpenChange(v);
       }}
@@ -237,6 +253,23 @@ function LessonDialog({
       <DialogContent>
         <DialogHeader><DialogTitle>{lesson ? "Edit lesson" : "Schedule lesson"}</DialogTitle></DialogHeader>
         <div className="space-y-4">
+          {templates.length > 0 && (
+            <div>
+              <Label>Use template</Label>
+              <Select
+                value=""
+                onValueChange={(val) => {
+                  const t = templates.find((x) => x.name === val);
+                  if (t) { setTopic(t.topic); setNotes(t.notes); setModuleId(t.moduleId); }
+                }}
+              >
+                <SelectTrigger><SelectValue placeholder="Apply a saved template…" /></SelectTrigger>
+                <SelectContent>
+                  {templates.map((t) => <SelectItem key={t.name} value={t.name}>{t.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div>
             <Label>Student *</Label>
             <Select value={studentId} onValueChange={setStudentId}>
@@ -268,6 +301,49 @@ function LessonDialog({
           <div>
             <Label htmlFor="topic">Topic</Label>
             <Input id="topic" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="e.g. Speaking practice" />
+            <div className="mt-1.5">
+              {!savingTemplate ? (
+                <button
+                  type="button"
+                  className="text-xs text-primary hover:underline"
+                  onClick={() => setSavingTemplate(true)}
+                >
+                  Save as template
+                </button>
+              ) : (
+                <div className="flex items-center gap-2 mt-1">
+                  <Input
+                    value={templateName}
+                    onChange={(e) => setTemplateName(e.target.value)}
+                    placeholder="Template name"
+                    className="h-7 text-xs"
+                    autoFocus
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="h-7 text-xs px-2"
+                    onClick={() => {
+                      if (!templateName.trim()) return;
+                      addTemplate({ name: templateName.trim(), topic, notes, moduleId });
+                      setTemplates(getTemplates());
+                      setTemplateName("");
+                      setSavingTemplate(false);
+                      toast.success("Template saved");
+                    }}
+                  >
+                    Save
+                  </Button>
+                  <button
+                    type="button"
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                    onClick={() => { setSavingTemplate(false); setTemplateName(""); }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           <div>
             <Label htmlFor="notes">Notes</Label>

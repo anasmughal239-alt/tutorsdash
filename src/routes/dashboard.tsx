@@ -11,6 +11,8 @@ import {
   ArrowRight,
   Zap,
   CheckCircle2,
+  Clock,
+  AlertTriangle,
 } from "lucide-react";
 import { fmtDateTime } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -38,7 +40,7 @@ function Dashboard() {
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
-      const [students, lessons, assignments, attendance] = await Promise.all([
+      const [students, lessons, assignments, attendance, allStudents, allLessons] = await Promise.all([
         supabase.from("students").select("id", { count: "exact", head: true }),
         supabase
           .from("lessons")
@@ -57,16 +59,69 @@ function Dashboard() {
             "recorded_at",
             new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
           ),
+        supabase.from("students").select("id,name").order("name"),
+        supabase.from("lessons").select("student_id,lesson_date").order("lesson_date", { ascending: false }),
       ]);
       const attRows = (attendance.data as { status: string }[] | null) ?? [];
       const present = attRows.filter((r) => r.status === "present").length;
       const attPct = attRows.length ? Math.round((present / attRows.length) * 100) : 0;
+
+      // Compute catch-up list
+      const studentList = (allStudents.data ?? []) as { id: string; name: string }[];
+      const lessonList = (allLessons.data ?? []) as { student_id: string | null; lesson_date: string }[];
+
+      // Latest lesson per student
+      const latestLesson: Record<string, Date> = {};
+      for (const l of lessonList) {
+        if (!l.student_id) continue;
+        const d = new Date(l.lesson_date);
+        if (!latestLesson[l.student_id] || d > latestLesson[l.student_id]) {
+          latestLesson[l.student_id] = d;
+        }
+      }
+
+      const now = new Date();
+      const catchUp = studentList
+        .filter((s) => {
+          if (!latestLesson[s.id]) return true; // never had a lesson
+          const diffDays = (now.getTime() - latestLesson[s.id].getTime()) / (1000 * 60 * 60 * 24);
+          return diffDays > 14;
+        })
+        .map((s) => {
+          if (!latestLesson[s.id]) return { id: s.id, name: s.name, label: "Never" };
+          const diffDays = Math.floor((now.getTime() - latestLesson[s.id].getTime()) / (1000 * 60 * 60 * 24));
+          return { id: s.id, name: s.name, label: `${diffDays} days ago` };
+        });
+
       return {
         students: students.count ?? 0,
         nextLessons: lessons.data ?? [],
         pendingAssignments: assignments.count ?? 0,
         attendancePct: attPct,
+        catchUp,
       };
+    },
+  });
+
+  // Today's lessons
+  const { data: todayLessons } = useQuery({
+    queryKey: ["today-lessons"],
+    queryFn: async () => {
+      const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+      const todayEnd   = new Date(); todayEnd.setHours(23, 59, 59, 999);
+      const { data } = await supabase
+        .from("lessons")
+        .select("id,lesson_date,topic,students(id,name),modules(name)")
+        .gte("lesson_date", todayStart.toISOString())
+        .lte("lesson_date", todayEnd.toISOString())
+        .order("lesson_date");
+      return (data ?? []) as Array<{
+        id: string;
+        lesson_date: string;
+        topic: string | null;
+        students: { id: string; name: string } | null;
+        modules: { name: string } | null;
+      }>;
     },
   });
 
@@ -306,8 +361,40 @@ function Dashboard() {
             />
           </div>
 
-          {/* Content cards */}
-          <div className="grid gap-6 lg:grid-cols-2">
+          {/* Today panel — full width */}
+          <ContentCard
+            title="Today's lessons"
+            icon={<Clock className="h-4 w-4 text-primary" />}
+            className="mb-6"
+          >
+            {!todayLessons ? (
+              <p className="text-sm text-muted-foreground">Loading…</p>
+            ) : todayLessons.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No lessons scheduled for today.</p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {todayLessons.map((l) => (
+                  <li key={l.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium text-foreground">
+                        {l.students?.name ?? "—"}
+                        {l.topic && <span className="font-normal text-muted-foreground"> · {l.topic}</span>}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        {fmtDateTime(l.lesson_date)}{l.modules?.name ? ` · ${l.modules.name}` : ""}
+                      </div>
+                    </div>
+                    <Button asChild size="sm" variant="outline">
+                      <Link to="/attendance">Mark attendance</Link>
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </ContentCard>
+
+          {/* Content cards — 3-col grid on xl */}
+          <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
             {/* Upcoming lessons */}
             <ContentCard
               title="Upcoming lessons"
@@ -377,6 +464,37 @@ function Dashboard() {
                 </ul>
               )}
             </ContentCard>
+
+            {/* Catch-up alerts */}
+            <ContentCard
+              title="Catch-up alerts"
+              icon={<AlertTriangle className="h-4 w-4 text-amber-500" />}
+            >
+              {!stats ? (
+                <p className="text-sm text-muted-foreground">Loading…</p>
+              ) : stats.catchUp.length === 0 ? (
+                <div className="flex items-center gap-2 py-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  <p className="text-sm text-green-700 font-medium">All students are active</p>
+                </div>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {stats.catchUp.map((s) => (
+                    <li key={s.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-foreground">{s.name}</div>
+                        <div className="text-xs text-amber-600 mt-0.5">
+                          Last seen: {s.label}
+                        </div>
+                      </div>
+                      <Button asChild size="sm" variant="outline">
+                        <Link to="/students/$id" params={{ id: s.id }}>View</Link>
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </ContentCard>
           </div>
         </>
       )}
@@ -414,14 +532,19 @@ function ContentCard({
   title,
   children,
   footerLink,
+  icon,
+  className,
 }: {
   title: string;
   children: React.ReactNode;
   footerLink?: { label: string; to: string };
+  icon?: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <div className="px-6 py-4 border-b border-border">
+    <div className={`bg-card rounded-xl border border-border overflow-hidden ${className ?? ""}`}>
+      <div className="px-6 py-4 border-b border-border flex items-center gap-2">
+        {icon}
         <h2 className="text-sm font-semibold text-foreground">{title}</h2>
       </div>
       <div className="px-6 py-4">{children}</div>

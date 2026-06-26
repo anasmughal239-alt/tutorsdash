@@ -7,9 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fmtDate, fmtDateTime, letterGrade } from "@/lib/format";
-import { Mail, MessageSquarePlus, Trash2, ChevronLeft } from "lucide-react";
+import { Mail, MessageSquarePlus, Trash2, ChevronLeft, Share2, FileDown } from "lucide-react";
 import { toast } from "sonner";
 import { humanizeError } from "@/lib/errors";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export const Route = createFileRoute("/students/$id")({
   component: StudentDetail,
@@ -27,12 +29,12 @@ function StudentDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("students")
-        .select("id,name,email,phone,student_modules(modules(id,name))")
+        .select("id,name,email,phone,share_token,student_modules(modules(id,name))")
         .eq("id", id)
         .maybeSingle();
       if (error) throw error;
       return data as {
-        id: string; name: string; email: string | null; phone: string | null;
+        id: string; name: string; email: string | null; phone: string | null; share_token: string | null;
         student_modules: { modules: { id: string; name: string } | null }[];
       } | null;
     },
@@ -121,6 +123,99 @@ function StudentDetail() {
     else toast.success(`Portal invite sent to ${student.email}`);
   };
 
+  const shareWhatsApp = () => {
+    if (!student?.share_token) return toast.error("No portal link available");
+    const url = `${window.location.origin}/student-portal/${student.share_token}`;
+    const msg = `Hi ${student.name}! Your tutor shared your TutorDash progress portal with you. View your results, lessons, and materials here: ${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+
+  const downloadReport = () => {
+    if (!student) return;
+    const doc = new jsPDF();
+    const pageW = doc.internal.pageSize.getWidth();
+
+    doc.setFillColor(32, 21, 21);
+    doc.rect(0, 0, pageW, 30, "F");
+    doc.setTextColor(255, 254, 251);
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("TutorDash", 14, 13);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("Student Progress Report", 14, 21);
+    doc.text(new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }), pageW - 14, 21, { align: "right" });
+
+    doc.setTextColor(32, 21, 21);
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text(student.name, 14, 44);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 100, 100);
+    if (student.email) doc.text(student.email, 14, 51);
+
+    let y = 62;
+
+    // Stats summary
+    doc.setTextColor(32, 21, 21);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("Summary", 14, y); y += 8;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(`Attendance: ${attPct}%  (${attPresent}/${attTotal} sessions)`, 14, y); y += 6;
+    doc.text(`Average Grade: ${avgGrade}%  (${letterGrade(avgGrade)})`, 14, y); y += 6;
+    const moduleNames = student.student_modules.map((sm) => sm.modules?.name).filter(Boolean).join(", ");
+    if (moduleNames) { doc.text(`Modules: ${moduleNames}`, 14, y); y += 6; }
+    y += 6;
+
+    // Grades table
+    if (grades?.length) {
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text("Grades", 14, y); y += 4;
+      autoTable(doc, {
+        startY: y,
+        head: [["Assessment", "Module", "Score", "%", "Grade", "Date"]],
+        body: grades.map((g) => [
+          g.assessment_name,
+          g.modules?.name ?? "",
+          `${g.marks_obtained}/${g.total_marks}`,
+          `${Math.round(Number(g.percentage))}%`,
+          letterGrade(Math.round(Number(g.percentage))),
+          fmtDate(g.date),
+        ]),
+        headStyles: { fillColor: [255, 79, 0], textColor: 255, fontStyle: "bold" },
+        alternateRowStyles: { fillColor: [252, 248, 242] },
+        styles: { fontSize: 9 },
+        margin: { left: 14, right: 14 },
+      });
+      y = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 12;
+    }
+
+    // Recent lessons
+    if (lessons?.length) {
+      if (y > 240) { doc.addPage(); y = 20; }
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(32, 21, 21);
+      doc.text("Recent Lessons", 14, y); y += 4;
+      autoTable(doc, {
+        startY: y,
+        head: [["Topic", "Module", "Date"]],
+        body: lessons.map((l) => [l.topic ?? "Lesson", l.modules?.name ?? "", fmtDateTime(l.lesson_date)]),
+        headStyles: { fillColor: [32, 21, 21], textColor: 255, fontStyle: "bold" },
+        alternateRowStyles: { fillColor: [252, 248, 242] },
+        styles: { fontSize: 9 },
+        margin: { left: 14, right: 14 },
+      });
+    }
+
+    doc.save(`${student.name.replace(/\s+/g, "_")}_progress_report.pdf`);
+    toast.success("Report downloaded");
+  };
+
   if (!student) return (
     <AppShell><PageHeader title="Student" /><p className="text-muted-foreground">Loading…</p></AppShell>
   );
@@ -144,11 +239,21 @@ function StudentDetail() {
         eyebrow="Student"
         description={[student.email, student.phone].filter(Boolean).join(" · ")}
         actions={
-          student.email ? (
-            <Button variant="outline" onClick={sendInvite}>
-              <Mail className="h-4 w-4 mr-1.5" /> Send portal invite
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" onClick={downloadReport}>
+              <FileDown className="h-4 w-4 mr-1.5" /> Download report
             </Button>
-          ) : undefined
+            {student.share_token && (
+              <Button variant="outline" onClick={shareWhatsApp}>
+                <Share2 className="h-4 w-4 mr-1.5" /> WhatsApp
+              </Button>
+            )}
+            {student.email && (
+              <Button variant="outline" onClick={sendInvite}>
+                <Mail className="h-4 w-4 mr-1.5" /> Send portal invite
+              </Button>
+            )}
+          </div>
         }
       />
 

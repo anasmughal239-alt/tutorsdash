@@ -48,7 +48,7 @@ function StudentPortal() {
 
       const [lessons, grades, attendance, materials, assignments, remarks] = await Promise.all([
         supabase.from("lessons")
-          .select("id,lesson_date,topic,modules(name)")
+          .select("id,lesson_date,topic,notes,modules(name)")
           .eq("student_id", sid).gte("lesson_date", new Date().toISOString())
           .order("lesson_date").limit(10),
         supabase.from("grades")
@@ -87,7 +87,7 @@ function StudentPortal() {
 
       return {
         student: student as { id: string; name: string; email: string | null; student_modules: { modules: { id: string; name: string } | null }[] },
-        lessons: (lessons.data ?? []) as { id: string; lesson_date: string; topic: string | null; modules: { name: string } | null }[],
+        lessons: (lessons.data ?? []) as { id: string; lesson_date: string; topic: string | null; notes: string | null; modules: { name: string } | null }[],
         grades: grades_,
         gradesByModule,
         attendance: { pct: attPct, present, total: attRows.length },
@@ -279,7 +279,11 @@ function StudentPortal() {
             ? <Empty msg="No lessons scheduled yet — your tutor will add these once sessions are booked." />
             : lessons.map((l) => (
               <Row key={l.id}
-                left={<><strong>{l.topic ?? "Lesson"}</strong><span style={{ color:"#939084" }}> · {l.modules?.name}</span></>}
+                left={<>
+                  <strong>{l.topic ?? "Lesson"}</strong>
+                  <span style={{ color:"#939084" }}> · {l.modules?.name}</span>
+                  {l.notes && <div style={{ fontSize:12, color:"#939084", marginTop:2, fontStyle:"italic" }}>{l.notes}</div>}
+                </>}
                 right={fmtDateTime(l.lesson_date)}
               />
             ))

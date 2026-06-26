@@ -30,7 +30,7 @@ function StudentPortal() {
 
       const [lessons, grades, attendance, materials, assignments] = await Promise.all([
         supabase
-          .from("lessons").select("id,lesson_date,topic,modules(name)")
+          .from("lessons").select("id,lesson_date,topic,notes,modules(name)")
           .eq("student_id", sid).gte("lesson_date", new Date().toISOString())
           .order("lesson_date").limit(10),
         supabase
@@ -58,7 +58,7 @@ function StudentPortal() {
 
       return {
         student: student as { id: string; name: string; email: string | null; student_modules: { modules: { id: string; name: string } | null }[] },
-        lessons: (lessons.data ?? []) as Array<{ id: string; lesson_date: string; topic: string | null; modules: { name: string } | null }>,
+        lessons: (lessons.data ?? []) as Array<{ id: string; lesson_date: string; topic: string | null; notes: string | null; modules: { name: string } | null }>,
         grades: grades_,
         attendance: { pct: attPct, present: attPresent, total: attRows.length },
         avg,
@@ -105,9 +105,12 @@ function StudentPortal() {
             {lessons.length === 0 && <p className="text-sm text-muted-foreground">No upcoming lessons.</p>}
             <ul className="space-y-2">
               {lessons.map((l) => (
-                <li key={l.id} className="flex justify-between text-sm border-b pb-2 last:border-0">
-                  <span>{l.topic ?? "Lesson"} · <span className="text-muted-foreground">{l.modules?.name}</span></span>
-                  <span className="text-muted-foreground">{fmtDateTime(l.lesson_date)}</span>
+                <li key={l.id} className="border-b pb-2 last:border-0">
+                  <div className="flex justify-between text-sm">
+                    <span>{l.topic ?? "Lesson"} · <span className="text-muted-foreground">{l.modules?.name}</span></span>
+                    <span className="text-muted-foreground whitespace-nowrap ml-2">{fmtDateTime(l.lesson_date)}</span>
+                  </div>
+                  {l.notes && <p className="text-xs text-muted-foreground italic mt-0.5">{l.notes}</p>}
                 </li>
               ))}
             </ul>

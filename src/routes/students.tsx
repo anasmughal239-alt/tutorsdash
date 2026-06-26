@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Pencil, Trash2, Plus, Search, Mail, Users } from "lucide-react";
+import { Pencil, Trash2, Plus, Search, Mail, Users, X, Sheet } from "lucide-react";
 import { toast } from "sonner";
 import { humanizeError } from "@/lib/errors";
 import {
@@ -62,6 +62,7 @@ function StudentsPage() {
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Student | null>(null);
   const [open, setOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const { data: students } = useQuery({
     queryKey: ["students"],
@@ -99,14 +100,14 @@ function StudentsPage() {
         title="Students"
         description="Manage your students and their module assignments."
         actions={
-          <Button
-            onClick={() => {
-              setEditing(null);
-              setOpen(true);
-            }}
-          >
-            <Plus className="h-4 w-4 mr-1" /> Add student
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setImportOpen(true)}>
+              <Sheet className="h-4 w-4 mr-1" /> Bulk import
+            </Button>
+            <Button onClick={() => { setEditing(null); setOpen(true); }}>
+              <Plus className="h-4 w-4 mr-1" /> Add student
+            </Button>
+          </div>
         }
       />
 
@@ -245,6 +246,7 @@ function StudentsPage() {
       </div>
 
       <StudentDialog open={open} onOpenChange={setOpen} student={editing} />
+      <BulkImportDialog open={importOpen} onOpenChange={setImportOpen} />
     </AppShell>
   );
 }
@@ -386,6 +388,139 @@ function StudentDialog({
           </Button>
           <Button onClick={() => save.mutate()} disabled={save.isPending}>
             {save.isPending ? "Saving…" : "Save"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+type GridRow = { name: string; email: string; phone: string };
+const emptyRow = (): GridRow => ({ name: "", email: "", phone: "" });
+
+function BulkImportDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const qc = useQueryClient();
+  const [rows, setRows] = useState<GridRow[]>(() => Array.from({ length: 8 }, emptyRow));
+  const [saving, setSaving] = useState(false);
+  const [errorRows, setErrorRows] = useState<Set<number>>(new Set());
+
+  const update = (i: number, field: keyof GridRow, value: string) => {
+    setRows((prev) => prev.map((r, idx) => (idx === i ? { ...r, [field]: value } : r)));
+    setErrorRows((prev) => { const s = new Set(prev); s.delete(i); return s; });
+  };
+
+  const addRows = () => setRows((prev) => [...prev, ...Array.from({ length: 5 }, emptyRow)]);
+  const removeRow = (i: number) => setRows((prev) => prev.filter((_, idx) => idx !== i));
+
+  const filledRows = rows.filter((r) => r.name.trim());
+
+  const save = async () => {
+    // highlight rows that have email/phone but no name
+    const bad = new Set<number>();
+    rows.forEach((r, i) => { if ((r.email || r.phone) && !r.name.trim()) bad.add(i); });
+    if (bad.size) { setErrorRows(bad); toast.error("Fill in the name for highlighted rows"); return; }
+    if (!filledRows.length) { toast.error("Enter at least one student name"); return; }
+
+    setSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const toInsert = filledRows.map((r) => ({
+        name: r.name.trim(),
+        email: r.email.trim() || null,
+        phone: r.phone.trim() || null,
+        tutor_id: user!.id,
+      }));
+      const { error } = await supabase.from("students").insert(toInsert);
+      if (error) throw error;
+      toast.success(`${filledRows.length} student${filledRows.length > 1 ? "s" : ""} added`);
+      qc.invalidateQueries({ queryKey: ["students"] });
+      onOpenChange(false);
+      setRows(Array.from({ length: 8 }, emptyRow));
+      setErrorRows(new Set());
+    } catch (e) {
+      toast.error(humanizeError(e as Error));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!saving) { onOpenChange(v); if (!v) { setRows(Array.from({ length: 8 }, emptyRow)); setErrorRows(new Set()); } } }}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Add students in bulk</DialogTitle>
+        </DialogHeader>
+
+        <p className="text-sm text-muted-foreground -mt-1">
+          Fill in the rows below — only Name is required. Leave empty rows blank.
+        </p>
+
+        {/* Spreadsheet grid */}
+        <div className="border rounded-lg overflow-hidden text-sm">
+          {/* Column headers */}
+          <div className="grid bg-muted/60 border-b" style={{ gridTemplateColumns: "36px 1fr 1fr 1fr 32px" }}>
+            <div />
+            {["Name *", "Email", "Phone"].map((h) => (
+              <div key={h} className="px-3 py-2 font-semibold text-xs text-muted-foreground border-l">{h}</div>
+            ))}
+            <div />
+          </div>
+
+          {/* Rows */}
+          <div className="max-h-80 overflow-y-auto divide-y">
+            {rows.map((row, i) => (
+              <div
+                key={i}
+                className={`grid items-stretch ${errorRows.has(i) ? "bg-destructive/5" : "hover:bg-muted/20"}`}
+                style={{ gridTemplateColumns: "36px 1fr 1fr 1fr 32px" }}
+              >
+                <div className="flex items-center justify-center text-xs text-muted-foreground select-none border-r">{i + 1}</div>
+                <input
+                  value={row.name}
+                  onChange={(e) => update(i, "name", e.target.value)}
+                  placeholder="Full name"
+                  className={`px-3 py-2 bg-transparent focus:outline-none focus:bg-primary/5 w-full border-l ${errorRows.has(i) ? "text-destructive placeholder:text-destructive/50" : ""}`}
+                />
+                <input
+                  value={row.email}
+                  onChange={(e) => update(i, "email", e.target.value)}
+                  placeholder="email@example.com"
+                  type="email"
+                  className="px-3 py-2 bg-transparent focus:outline-none focus:bg-primary/5 w-full border-l"
+                />
+                <input
+                  value={row.phone}
+                  onChange={(e) => update(i, "phone", e.target.value)}
+                  placeholder="+92 300 0000000"
+                  className="px-3 py-2 bg-transparent focus:outline-none focus:bg-primary/5 w-full border-l"
+                />
+                <button
+                  onClick={() => removeRow(i)}
+                  className="flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors border-l"
+                  tabIndex={-1}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Add more rows */}
+          <button
+            onClick={addRows}
+            className="w-full py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/30 flex items-center justify-center gap-1.5 border-t transition-colors"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add 5 more rows
+          </button>
+        </div>
+
+        <DialogFooter className="items-center">
+          <span className="text-xs text-muted-foreground mr-auto">
+            {filledRows.length} student{filledRows.length !== 1 ? "s" : ""} ready to save
+          </span>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
+          <Button onClick={save} disabled={saving || filledRows.length === 0}>
+            {saving ? "Saving…" : `Save ${filledRows.length || ""} student${filledRows.length !== 1 ? "s" : ""}`}
           </Button>
         </DialogFooter>
       </DialogContent>

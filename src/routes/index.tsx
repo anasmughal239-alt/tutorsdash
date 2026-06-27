@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Users, CalendarDays, FolderOpen, TrendingUp, CheckSquare, ClipboardList, ArrowRight, Zap, BookOpen, LayoutDashboard, Check, GraduationCap, MessageSquare, BookMarked, ListChecks, FileText, PackageOpen, School } from "lucide-react";
+import { Users, CalendarDays, FolderOpen, TrendingUp, CheckSquare, ClipboardList, ArrowRight, Zap, BookOpen, LayoutDashboard, Check, GraduationCap, BookMarked, ListChecks, FileText, PackageOpen, School } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -132,8 +132,10 @@ function LandingPage() {
         .zp-b3 { grid-column: span 4; }
         .zp-b4 { grid-column: span 4; }
         .zp-b5 { grid-column: span 4; }
-        .zp-b6 { grid-column: span 7; }
-        .zp-b7 { grid-column: span 5; }
+        .zp-b6 { grid-column: span 6; }
+        .zp-b7 { grid-column: span 6; }
+        .zp-b8 { grid-column: span 7; }
+        .zp-b9 { grid-column: span 5; }
         .zp-b-ico { width: 40px; height: 40px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
         .zp-b-ico-cream { background: var(--canvas); }
         .zp-b-ico-dark  { background: rgba(255,254,251,.07); }
@@ -298,7 +300,7 @@ function LandingPage() {
         <div className="zp-strip">
           <div className="zp-strip-in">
             {[
-              {n:"9+",    l:"Core features",   s:"Students to progress reports"},
+              {n:"15+",   l:"Core features",   s:"From modules to inspector exports"},
               {n:"2 min", l:"To get started",  s:"First student added in minutes"},
               {n:"100%",  l:"Spreadsheet-free",s:"Everything in one dashboard"},
             ].map((s,i) => (
@@ -323,49 +325,63 @@ function LandingPage() {
             <div className="zp-b zp-b1 zp-b-dark">
               <div className="zp-b-ico zp-b-ico-dark"><Users size={20} color="rgba(255,254,251,.7)" /></div>
               <p className="zp-card-title" style={{color:"var(--on-primary)",marginBottom:8}}>Student management</p>
-              <p className="zp-body-sm" style={{color:"rgba(255,254,251,.55)"}}>Add students one by one or bulk-import from a spreadsheet. See modules, grades, and history on one profile.</p>
+              <p className="zp-body-sm" style={{color:"rgba(255,254,251,.55)"}}>Add students, store contact details, and view every module, grade, and lesson on one profile.</p>
+            </div>
+
+            {/* Cream — Modules */}
+            <div className="zp-b zp-b2 zp-b-cream">
+              <div className="zp-b-ico zp-b-ico-cream"><BookOpen size={20} color="var(--ink)" /></div>
+              <p className="zp-card-title" style={{color:"var(--ink)",marginBottom:8}}>Modules & batches</p>
+              <p className="zp-body-sm">Create subject batches (e.g. "IELTS Speaking", "Math Grade 9"), assign multiple students, and manage everything per batch.</p>
             </div>
 
             {/* Cream — Lessons */}
-            <div className="zp-b zp-b2 zp-b-cream">
+            <div className="zp-b zp-b3 zp-b-cream">
               <div className="zp-b-ico zp-b-ico-cream"><CalendarDays size={20} color="var(--ink)" /></div>
               <p className="zp-card-title" style={{color:"var(--ink)",marginBottom:8}}>Lesson scheduling</p>
-              <p className="zp-body-sm">Plan lessons with dates, topics, and notes. See your full week at a glance from the dashboard.</p>
+              <p className="zp-body-sm">Plan lessons with dates, topics, and notes. Upcoming lessons surface on the dashboard.</p>
             </div>
 
             {/* Cream — Attendance */}
-            <div className="zp-b zp-b3 zp-b-cream">
+            <div className="zp-b zp-b4 zp-b-cream">
               <div className="zp-b-ico zp-b-ico-cream"><CheckSquare size={20} color="var(--ink)" /></div>
-              <p className="zp-card-title" style={{color:"var(--ink)",marginBottom:8}}>Attendance</p>
-              <p className="zp-body-sm">Tap to mark present, absent, or late. Monthly rates auto-calculated.</p>
+              <p className="zp-card-title" style={{color:"var(--ink)",marginBottom:8}}>Attendance tracking</p>
+              <p className="zp-body-sm">Tap to mark present, absent, or late. Monthly attendance % auto-calculated per student.</p>
             </div>
 
             {/* Cream — Grades */}
-            <div className="zp-b zp-b4 zp-b-cream">
+            <div className="zp-b zp-b5 zp-b-cream">
               <div className="zp-b-ico zp-b-ico-cream"><GraduationCap size={20} color="var(--ink)" /></div>
               <p className="zp-card-title" style={{color:"var(--ink)",marginBottom:8}}>Grades & marks</p>
-              <p className="zp-body-sm">Record test scores with a quick-entry form. Pakistan grading scale (A++ to E) applied automatically.</p>
+              <p className="zp-body-sm">Record test scores with a quick form. Pakistan grading (A++ to E) applied automatically from percentages.</p>
+            </div>
+
+            {/* Dark — Assignments */}
+            <div className="zp-b zp-b6 zp-b-dark">
+              <div className="zp-b-ico zp-b-ico-dark"><ClipboardList size={20} color="rgba(255,254,251,.7)" /></div>
+              <p className="zp-card-title" style={{color:"var(--on-primary)",marginBottom:8}}>Assignments</p>
+              <p className="zp-body-sm" style={{color:"rgba(255,254,251,.55)"}}>Create assignments per module, set due dates, and track submission status (pending / submitted / complete) per student.</p>
             </div>
 
             {/* Cream — Progress */}
-            <div className="zp-b zp-b5 zp-b-cream">
+            <div className="zp-b zp-b7 zp-b-cream">
               <div className="zp-b-ico zp-b-ico-cream"><TrendingUp size={20} color="var(--ink)" /></div>
               <p className="zp-card-title" style={{color:"var(--ink)",marginBottom:8}}>Progress reports</p>
-              <p className="zp-body-sm">Auto-generated PDF reports with marks, attendance %, and assignment completion rates.</p>
+              <p className="zp-body-sm">Auto-generated PDF reports covering marks, attendance %, and assignment completion — shareable with parents.</p>
             </div>
 
             {/* Cream — Materials */}
-            <div className="zp-b zp-b6 zp-b-cream">
+            <div className="zp-b zp-b8 zp-b-cream">
               <div className="zp-b-ico zp-b-ico-cream"><FolderOpen size={20} color="var(--ink)" /></div>
               <p className="zp-card-title" style={{color:"var(--ink)",marginBottom:8}}>Materials upload</p>
-              <p className="zp-body-sm">Upload PDFs organised by module. Students download from their own private portal — no WhatsApp chaos.</p>
+              <p className="zp-body-sm">Upload PDFs and notes organised by module and topic. Students download directly from their private portal — no WhatsApp forwarding needed.</p>
             </div>
 
-            {/* Dark — WhatsApp */}
-            <div className="zp-b zp-b7 zp-b-dark">
-              <div className="zp-b-ico zp-b-ico-dark"><MessageSquare size={20} color="rgba(255,254,251,.7)" /></div>
-              <p className="zp-card-title" style={{color:"var(--on-primary)",marginBottom:8}}>WhatsApp bulk messaging</p>
-              <p className="zp-body-sm" style={{color:"rgba(255,254,251,.55)"}}>Select multiple students, type one message, and open WhatsApp for each in one click.</p>
+            {/* Dark — Student portal */}
+            <div className="zp-b zp-b9 zp-b-dark">
+              <div className="zp-b-ico zp-b-ico-dark"><Users size={20} color="rgba(255,254,251,.7)" /></div>
+              <p className="zp-card-title" style={{color:"var(--on-primary)",marginBottom:8}}>Student portal</p>
+              <p className="zp-body-sm" style={{color:"rgba(255,254,251,.55)"}}>Share a private link with each student. They see their modules, materials, grades, and upcoming lessons — all read-only.</p>
             </div>
 
           </div>
@@ -449,8 +465,8 @@ function LandingPage() {
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20,maxWidth:680}}>
             {[
-              {name:"Starter",price:"500",limit:"Up to 5 students",features:["All tutor features","Lessons & attendance","Grades & reports","Student portal"],highlight:false},
-              {name:"Pro",price:"999",limit:"Unlimited students",features:["Everything in Starter","School mode","PTM report cards","Inspector-ready export"],highlight:true},
+              {name:"Starter",price:"500",limit:"Up to 5 students",features:["Modules & batches","Lessons & attendance","Grades & progress reports","Assignments tracking","Materials upload","Student portal"],highlight:false},
+              {name:"Pro",price:"999",limit:"Unlimited students",features:["Everything in Starter","School mode","Class attendance register","Scheme of work planner","PTM report cards (PDF)","Inspector-ready export"],highlight:true},
             ].map(p => (
               <div key={p.name} style={{border:p.highlight?"2px solid #ff4f00":"1.5px solid #c5c0b1",borderRadius:16,padding:28,background:p.highlight?"#fff8f5":"var(--canvas)",position:"relative"}}>
                 {p.highlight && <div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",background:"#ff4f00",color:"#fff",fontSize:10,fontWeight:700,padding:"3px 12px",borderRadius:999,whiteSpace:"nowrap"}}>MOST POPULAR</div>}

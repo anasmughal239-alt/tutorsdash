@@ -8,7 +8,7 @@ export const Route = createFileRoute("/pricing")({
 });
 
 // TODO: Replace with your WhatsApp number (country code + number, no +)
-const WA_NUMBER = "923001234567";
+const WA_NUMBER = "923062502316";
 
 function waLink(plan: string, email: string) {
   const msg = `Hi! I'd like to subscribe to TutorDash ${plan} plan.\nMy registered email: ${email || "(please include your email)"}`;

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Users, CalendarDays, FolderOpen, TrendingUp, CheckSquare, ClipboardList, ArrowRight, Zap, BookOpen, LayoutDashboard, Check } from "lucide-react";
+import { Users, CalendarDays, FolderOpen, TrendingUp, CheckSquare, ClipboardList, ArrowRight, Zap, BookOpen, LayoutDashboard, Check, GraduationCap, MessageSquare, BookMarked, ListChecks, FileText, PackageOpen, School } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -311,11 +311,11 @@ function LandingPage() {
           </div>
         </div>
 
-        {/* ── Bento features ── */}
+        {/* ── Tutor features bento ── */}
         <section className="zp-bento-wrap">
           <div className="zp-bento-hd">
-            <p className="zp-eyebrow">Features</p>
-            <h2 className="zp-display-lg">Everything a tutor needs.<br />Nothing they don't.</h2>
+            <p className="zp-eyebrow">For private tutors</p>
+            <h2 className="zp-display-lg">Your entire tutoring business<br />in one dashboard.</h2>
           </div>
           <div className="zp-bento">
 
@@ -323,10 +323,10 @@ function LandingPage() {
             <div className="zp-b zp-b1 zp-b-dark">
               <div className="zp-b-ico zp-b-ico-dark"><Users size={20} color="rgba(255,254,251,.7)" /></div>
               <p className="zp-card-title" style={{color:"var(--on-primary)",marginBottom:8}}>Student management</p>
-              <p className="zp-body-sm" style={{color:"rgba(255,254,251,.55)"}}>Every student's details, modules, grades, and history in one clean profile. Nothing slips through.</p>
+              <p className="zp-body-sm" style={{color:"rgba(255,254,251,.55)"}}>Add students one by one or bulk-import from a spreadsheet. See modules, grades, and history on one profile.</p>
             </div>
 
-            {/* Cream — Scheduling */}
+            {/* Cream — Lessons */}
             <div className="zp-b zp-b2 zp-b-cream">
               <div className="zp-b-ico zp-b-ico-cream"><CalendarDays size={20} color="var(--ink)" /></div>
               <p className="zp-card-title" style={{color:"var(--ink)",marginBottom:8}}>Lesson scheduling</p>
@@ -337,39 +337,73 @@ function LandingPage() {
             <div className="zp-b zp-b3 zp-b-cream">
               <div className="zp-b-ico zp-b-ico-cream"><CheckSquare size={20} color="var(--ink)" /></div>
               <p className="zp-card-title" style={{color:"var(--ink)",marginBottom:8}}>Attendance</p>
-              <p className="zp-body-sm">Mark present or absent in a tap. Monthly rates calculated automatically.</p>
+              <p className="zp-body-sm">Tap to mark present, absent, or late. Monthly rates auto-calculated.</p>
             </div>
 
-            {/* Cream — Assignments */}
+            {/* Cream — Grades */}
             <div className="zp-b zp-b4 zp-b-cream">
-              <div className="zp-b-ico zp-b-ico-cream"><ClipboardList size={20} color="var(--ink)" /></div>
-              <p className="zp-card-title" style={{color:"var(--ink)",marginBottom:8}}>Assignments</p>
-              <p className="zp-body-sm">Assign tasks and instantly see who's submitted and who's behind.</p>
+              <div className="zp-b-ico zp-b-ico-cream"><GraduationCap size={20} color="var(--ink)" /></div>
+              <p className="zp-card-title" style={{color:"var(--ink)",marginBottom:8}}>Grades & marks</p>
+              <p className="zp-body-sm">Record test scores with a quick-entry form. Pakistan grading scale (A++ to E) applied automatically.</p>
             </div>
 
             {/* Cream — Progress */}
             <div className="zp-b zp-b5 zp-b-cream">
               <div className="zp-b-ico zp-b-ico-cream"><TrendingUp size={20} color="var(--ink)" /></div>
               <p className="zp-card-title" style={{color:"var(--ink)",marginBottom:8}}>Progress reports</p>
-              <p className="zp-body-sm">Auto-generated reports with marks, attendance %, and completion rates.</p>
+              <p className="zp-body-sm">Auto-generated PDF reports with marks, attendance %, and assignment completion rates.</p>
             </div>
 
             {/* Cream — Materials */}
             <div className="zp-b zp-b6 zp-b-cream">
               <div className="zp-b-ico zp-b-ico-cream"><FolderOpen size={20} color="var(--ink)" /></div>
               <p className="zp-card-title" style={{color:"var(--ink)",marginBottom:8}}>Materials upload</p>
-              <p className="zp-body-sm">Upload PDFs organised by module. Students access files from their own private portal link — no WhatsApp file sharing needed.</p>
+              <p className="zp-body-sm">Upload PDFs organised by module. Students download from their own private portal — no WhatsApp chaos.</p>
             </div>
 
-            {/* Dark — Modules */}
+            {/* Dark — WhatsApp */}
             <div className="zp-b zp-b7 zp-b-dark">
-              <div className="zp-b-ico zp-b-ico-dark"><BookOpen size={20} color="rgba(255,254,251,.7)" /></div>
-              <p className="zp-card-title" style={{color:"var(--on-primary)",marginBottom:8}}>Module management</p>
-              <p className="zp-body-sm" style={{color:"rgba(255,254,251,.55)"}}>Create batches like "IELTS Speaking" and assign students directly to them.</p>
+              <div className="zp-b-ico zp-b-ico-dark"><MessageSquare size={20} color="rgba(255,254,251,.7)" /></div>
+              <p className="zp-card-title" style={{color:"var(--on-primary)",marginBottom:8}}>WhatsApp bulk messaging</p>
+              <p className="zp-body-sm" style={{color:"rgba(255,254,251,.55)"}}>Select multiple students, type one message, and open WhatsApp for each in one click.</p>
             </div>
 
           </div>
         </section>
+
+        {/* ── School teacher dark band ── */}
+        <div style={{background:"var(--ink)"}}>
+          <div style={{maxWidth:1280,margin:"0 auto",padding:"72px 24px"}}>
+            <p className="zp-eyebrow" style={{color:"rgba(255,254,251,.45)",marginBottom:16}}>For school teachers</p>
+            <h2 className="zp-display-lg" style={{color:"var(--on-primary)",marginBottom:12}}>Also a school teacher?<br />Switch modes in one click.</h2>
+            <p className="zp-body-lg" style={{color:"rgba(255,254,251,.55)",maxWidth:520,marginBottom:48}}>
+              Same login. Toggle to School mode and get a full set of classroom tools — built for Pakistani schools.
+            </p>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:16}}>
+              {[
+                {icon:School,      title:"Class management",      desc:"Create classes, enroll students, manage sections — all in one place."},
+                {icon:BookMarked,  title:"Teacher diary",         desc:"Log today's topic, homework, and remarks in under a minute."},
+                {icon:CheckSquare, title:"Class attendance",      desc:"Tap to mark each student. 'Mark all present' for quick days."},
+                {icon:ListChecks,  title:"Scheme of work",        desc:"40-week year planner with behind-schedule alerts and % progress bar."},
+                {icon:FileText,    title:"PTM report cards",      desc:"Enter marks once, generate signed PDF report cards for every student."},
+                {icon:PackageOpen, title:"Inspector export",      desc:"One click: 4-page PDF bundle ready for any inspection — scheme, diary, attendance."},
+              ].map(({icon:Icon, title, desc}) => (
+                <div key={title} style={{background:"rgba(255,254,251,.05)",border:"1px solid rgba(255,254,251,.1)",borderRadius:14,padding:24}}>
+                  <div style={{width:38,height:38,borderRadius:10,background:"rgba(255,254,251,.08)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:14}}>
+                    <Icon size={18} color="rgba(255,254,251,.7)" />
+                  </div>
+                  <p style={{fontSize:15,fontWeight:600,color:"var(--on-primary)",marginBottom:6}}>{title}</p>
+                  <p style={{fontSize:13,color:"rgba(255,254,251,.5)",lineHeight:1.55}}>{desc}</p>
+                </div>
+              ))}
+            </div>
+            <div style={{marginTop:36}}>
+              <Link to="/login" className="zp-btn zp-btn-primary" style={{fontSize:15,padding:"12px 24px"}}>
+                Start free trial <ArrowRight size={16} />
+              </Link>
+            </div>
+          </div>
+        </div>
 
         {/* ── Highlight ── */}
         <div className="zp-hl">

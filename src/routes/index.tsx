@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Users, CalendarDays, FolderOpen, TrendingUp, CheckSquare, ClipboardList, ArrowRight, Zap, BookOpen, LayoutDashboard } from "lucide-react";
+import { Users, CalendarDays, FolderOpen, TrendingUp, CheckSquare, ClipboardList, ArrowRight, Zap, BookOpen, LayoutDashboard, Check } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -192,8 +192,11 @@ function LandingPage() {
               <div className="zp-brand-mark"><Zap size={14} color="#fffefb" /></div>
               <span className="zp-brand-name">TutorDash</span>
             </div>
-            <Link to="/dashboard" className="zp-btn zp-btn-primary zp-btn-primary-sm">
-              Open Dashboard
+            <Link to="/pricing" className="zp-btn zp-btn-outline" style={{fontSize:14,padding:"8px 16px"}}>
+              Pricing
+            </Link>
+            <Link to="/login" className="zp-btn zp-btn-primary zp-btn-primary-sm">
+              Start trial
             </Link>
           </div>
         </nav>
@@ -209,14 +212,14 @@ function LandingPage() {
               Replace the spreadsheets and WhatsApp chaos with a professional workspace. Students, lessons, attendance, grades — beautifully organised.
             </p>
             <div className="zp-hero-ctas za4">
-              <Link to="/dashboard" className="zp-btn zp-btn-primary">
-                Get started free <ArrowRight size={17} />
+              <Link to="/login" className="zp-btn zp-btn-primary">
+                Start free trial <ArrowRight size={17} />
               </Link>
-              <Link to="/dashboard" className="zp-btn zp-btn-outline">
-                Open Dashboard
+              <Link to="/pricing" className="zp-btn zp-btn-outline">
+                See pricing
               </Link>
             </div>
-            <p className="zp-hero-proof za5">Free to use · No credit card required · 2 minute setup</p>
+            <p className="zp-hero-proof za5">Starts from Rs 500/month · 7-day trial · 2 minute setup</p>
           </div>
 
           {/* Dashboard mockup */}
@@ -404,6 +407,35 @@ function LandingPage() {
           </div>
         </div>
 
+        {/* ── Pricing ── */}
+        <section className="zp-bento-wrap" style={{paddingTop:0}}>
+          <div className="zp-bento-hd">
+            <p className="zp-eyebrow">Pricing</p>
+            <h2 className="zp-display-lg">Simple, honest pricing.</h2>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20,maxWidth:680}}>
+            {[
+              {name:"Starter",price:"500",limit:"Up to 5 students",features:["All tutor features","Lessons & attendance","Grades & reports","Student portal"],highlight:false},
+              {name:"Pro",price:"999",limit:"Unlimited students",features:["Everything in Starter","School mode","PTM report cards","Inspector-ready export"],highlight:true},
+            ].map(p => (
+              <div key={p.name} style={{border:p.highlight?"2px solid #ff4f00":"1.5px solid #c5c0b1",borderRadius:16,padding:28,background:p.highlight?"#fff8f5":"var(--canvas)",position:"relative"}}>
+                {p.highlight && <div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",background:"#ff4f00",color:"#fff",fontSize:10,fontWeight:700,padding:"3px 12px",borderRadius:999,whiteSpace:"nowrap"}}>MOST POPULAR</div>}
+                <div style={{fontSize:18,fontWeight:600,color:"var(--ink)",marginBottom:4}}>{p.name}</div>
+                <div style={{marginBottom:16}}><span style={{fontSize:36,fontWeight:700,color:"var(--ink)"}}>Rs {p.price}</span><span style={{fontSize:13,color:"var(--body-mid)"}}>/month</span></div>
+                <ul style={{listStyle:"none",padding:0,margin:"0 0 20px",display:"flex",flexDirection:"column",gap:8}}>
+                  <li style={{fontSize:13,fontWeight:600,color:"var(--body-mid)",marginBottom:4}}>{p.limit}</li>
+                  {p.features.map(f=><li key={f} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--ink-soft)"}}>
+                    <Check size={13} color="#ff4f00"/>{f}
+                  </li>)}
+                </ul>
+                <Link to="/pricing" className="zp-btn" style={{width:"100%",justifyContent:"center",background:p.highlight?"#ff4f00":"var(--ink)",color:"#fff",fontSize:14,padding:"11px 0",borderRadius:10,fontWeight:600}}>
+                  Get started
+                </Link>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* ── CTA dark band ── */}
         <div className="zp-cta">
           <div className="zp-cta-in">
@@ -412,14 +444,14 @@ function LandingPage() {
               Start your dashboard today.
             </h2>
             <p className="zp-body-lg zp-body-lg-light">
-              Set up in 2 minutes. Free forever. No credit card.
+              7-day trial. Then from Rs 500/month. No hidden fees.
             </p>
             <div className="zp-cta-btns">
-              <Link to="/dashboard" className="zp-btn zp-btn-primary">
-                Get started free <ArrowRight size={16} />
+              <Link to="/login" className="zp-btn zp-btn-primary">
+                Start free trial <ArrowRight size={16} />
               </Link>
-              <Link to="/dashboard" className="zp-btn zp-btn-outline-light">
-                Open Dashboard
+              <Link to="/pricing" className="zp-btn zp-btn-outline-light">
+                See pricing
               </Link>
             </div>
           </div>

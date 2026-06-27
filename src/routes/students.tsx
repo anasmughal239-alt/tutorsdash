@@ -27,6 +27,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Pencil, Trash2, Plus, Search, Mail, Users, X, Sheet, GraduationCap, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { humanizeError } from "@/lib/errors";
+import { useSubscription } from "@/lib/subscription";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -62,6 +63,7 @@ type Student = {
 
 function StudentsPage() {
   const qc = useQueryClient();
+  const sub = useSubscription();
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Student | null>(null);
   const [open, setOpen] = useState(false);
@@ -139,7 +141,16 @@ function StudentsPage() {
             <Button variant="outline" onClick={() => setImportOpen(true)}>
               <Sheet className="h-4 w-4 mr-1" /> Bulk import
             </Button>
-            <Button onClick={() => { setEditing(null); setOpen(true); }}>
+            <Button onClick={() => {
+              if ((students?.length ?? 0) >= sub.studentLimit) {
+                toast.error(`Student limit reached (${sub.studentLimit}/${sub.studentLimit}).`, {
+                  description: "Upgrade your plan to add more students.",
+                  action: { label: "View plans", onClick: () => window.location.assign("/pricing") },
+                });
+                return;
+              }
+              setEditing(null); setOpen(true);
+            }}>
               <Plus className="h-4 w-4 mr-1" /> Add student
             </Button>
           </div>

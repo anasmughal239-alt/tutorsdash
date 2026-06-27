@@ -20,10 +20,11 @@ export function fmtBytes(n: number | null | undefined) {
 }
 
 export function letterGrade(pct: number): string {
-  if (pct >= 90) return "A+";
-  if (pct >= 80) return "A";
-  if (pct >= 70) return "B";
-  if (pct >= 60) return "C";
-  if (pct >= 50) return "D";
-  return "F";
+  if (pct >= 85) return "A++";
+  if (pct >= 80) return "A+";
+  if (pct >= 75) return "A";
+  if (pct >= 60) return "B";
+  if (pct >= 45) return "C";
+  if (pct >= 40) return "D";
+  return "E";
 }

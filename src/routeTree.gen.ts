@@ -10,6 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudentsRouteImport } from './routes/students'
+import { Route as SchoolSchemeRouteImport } from './routes/school-scheme'
+import { Route as SchoolPtmRouteImport } from './routes/school-ptm'
+import { Route as SchoolDiaryRouteImport } from './routes/school-diary'
+import { Route as SchoolClassesRouteImport } from './routes/school-classes'
+import { Route as SchoolAttendanceRouteImport } from './routes/school-attendance'
 import { Route as ProgressReportsRouteImport } from './routes/progress-reports'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as ModulesRouteImport } from './routes/modules'
@@ -23,11 +28,37 @@ import { Route as AssignmentsRouteImport } from './routes/assignments'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as StudentPortalTokenRouteImport } from './routes/student-portal.$token'
+import { Route as SchoolClassesIdRouteImport } from './routes/school-classes.$id'
 import { Route as ModulesIdRouteImport } from './routes/modules.$id'
 
 const StudentsRoute = StudentsRouteImport.update({
   id: '/students',
   path: '/students',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchoolSchemeRoute = SchoolSchemeRouteImport.update({
+  id: '/school-scheme',
+  path: '/school-scheme',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchoolPtmRoute = SchoolPtmRouteImport.update({
+  id: '/school-ptm',
+  path: '/school-ptm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchoolDiaryRoute = SchoolDiaryRouteImport.update({
+  id: '/school-diary',
+  path: '/school-diary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchoolClassesRoute = SchoolClassesRouteImport.update({
+  id: '/school-classes',
+  path: '/school-classes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchoolAttendanceRoute = SchoolAttendanceRouteImport.update({
+  id: '/school-attendance',
+  path: '/school-attendance',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProgressReportsRoute = ProgressReportsRouteImport.update({
@@ -95,6 +126,11 @@ const StudentPortalTokenRoute = StudentPortalTokenRouteImport.update({
   path: '/student-portal/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SchoolClassesIdRoute = SchoolClassesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => SchoolClassesRoute,
+} as any)
 const ModulesIdRoute = ModulesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -113,8 +149,14 @@ export interface FileRoutesByFullPath {
   '/modules': typeof ModulesRouteWithChildren
   '/portal': typeof PortalRoute
   '/progress-reports': typeof ProgressReportsRoute
+  '/school-attendance': typeof SchoolAttendanceRoute
+  '/school-classes': typeof SchoolClassesRouteWithChildren
+  '/school-diary': typeof SchoolDiaryRoute
+  '/school-ptm': typeof SchoolPtmRoute
+  '/school-scheme': typeof SchoolSchemeRoute
   '/students': typeof StudentsRouteWithChildren
   '/modules/$id': typeof ModulesIdRoute
+  '/school-classes/$id': typeof SchoolClassesIdRoute
   '/student-portal/$token': typeof StudentPortalTokenRoute
   '/students/$id': typeof StudentsIdRoute
 }
@@ -130,8 +172,14 @@ export interface FileRoutesByTo {
   '/modules': typeof ModulesRouteWithChildren
   '/portal': typeof PortalRoute
   '/progress-reports': typeof ProgressReportsRoute
+  '/school-attendance': typeof SchoolAttendanceRoute
+  '/school-classes': typeof SchoolClassesRouteWithChildren
+  '/school-diary': typeof SchoolDiaryRoute
+  '/school-ptm': typeof SchoolPtmRoute
+  '/school-scheme': typeof SchoolSchemeRoute
   '/students': typeof StudentsRouteWithChildren
   '/modules/$id': typeof ModulesIdRoute
+  '/school-classes/$id': typeof SchoolClassesIdRoute
   '/student-portal/$token': typeof StudentPortalTokenRoute
   '/students/$id': typeof StudentsIdRoute
 }
@@ -148,8 +196,14 @@ export interface FileRoutesById {
   '/modules': typeof ModulesRouteWithChildren
   '/portal': typeof PortalRoute
   '/progress-reports': typeof ProgressReportsRoute
+  '/school-attendance': typeof SchoolAttendanceRoute
+  '/school-classes': typeof SchoolClassesRouteWithChildren
+  '/school-diary': typeof SchoolDiaryRoute
+  '/school-ptm': typeof SchoolPtmRoute
+  '/school-scheme': typeof SchoolSchemeRoute
   '/students': typeof StudentsRouteWithChildren
   '/modules/$id': typeof ModulesIdRoute
+  '/school-classes/$id': typeof SchoolClassesIdRoute
   '/student-portal/$token': typeof StudentPortalTokenRoute
   '/students/$id': typeof StudentsIdRoute
 }
@@ -167,8 +221,14 @@ export interface FileRouteTypes {
     | '/modules'
     | '/portal'
     | '/progress-reports'
+    | '/school-attendance'
+    | '/school-classes'
+    | '/school-diary'
+    | '/school-ptm'
+    | '/school-scheme'
     | '/students'
     | '/modules/$id'
+    | '/school-classes/$id'
     | '/student-portal/$token'
     | '/students/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -184,8 +244,14 @@ export interface FileRouteTypes {
     | '/modules'
     | '/portal'
     | '/progress-reports'
+    | '/school-attendance'
+    | '/school-classes'
+    | '/school-diary'
+    | '/school-ptm'
+    | '/school-scheme'
     | '/students'
     | '/modules/$id'
+    | '/school-classes/$id'
     | '/student-portal/$token'
     | '/students/$id'
   id:
@@ -201,8 +267,14 @@ export interface FileRouteTypes {
     | '/modules'
     | '/portal'
     | '/progress-reports'
+    | '/school-attendance'
+    | '/school-classes'
+    | '/school-diary'
+    | '/school-ptm'
+    | '/school-scheme'
     | '/students'
     | '/modules/$id'
+    | '/school-classes/$id'
     | '/student-portal/$token'
     | '/students/$id'
   fileRoutesById: FileRoutesById
@@ -219,6 +291,11 @@ export interface RootRouteChildren {
   ModulesRoute: typeof ModulesRouteWithChildren
   PortalRoute: typeof PortalRoute
   ProgressReportsRoute: typeof ProgressReportsRoute
+  SchoolAttendanceRoute: typeof SchoolAttendanceRoute
+  SchoolClassesRoute: typeof SchoolClassesRouteWithChildren
+  SchoolDiaryRoute: typeof SchoolDiaryRoute
+  SchoolPtmRoute: typeof SchoolPtmRoute
+  SchoolSchemeRoute: typeof SchoolSchemeRoute
   StudentsRoute: typeof StudentsRouteWithChildren
   StudentPortalTokenRoute: typeof StudentPortalTokenRoute
 }
@@ -230,6 +307,41 @@ declare module '@tanstack/react-router' {
       path: '/students'
       fullPath: '/students'
       preLoaderRoute: typeof StudentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/school-scheme': {
+      id: '/school-scheme'
+      path: '/school-scheme'
+      fullPath: '/school-scheme'
+      preLoaderRoute: typeof SchoolSchemeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/school-ptm': {
+      id: '/school-ptm'
+      path: '/school-ptm'
+      fullPath: '/school-ptm'
+      preLoaderRoute: typeof SchoolPtmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/school-diary': {
+      id: '/school-diary'
+      path: '/school-diary'
+      fullPath: '/school-diary'
+      preLoaderRoute: typeof SchoolDiaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/school-classes': {
+      id: '/school-classes'
+      path: '/school-classes'
+      fullPath: '/school-classes'
+      preLoaderRoute: typeof SchoolClassesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/school-attendance': {
+      id: '/school-attendance'
+      path: '/school-attendance'
+      fullPath: '/school-attendance'
+      preLoaderRoute: typeof SchoolAttendanceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/progress-reports': {
@@ -323,6 +435,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentPortalTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/school-classes/$id': {
+      id: '/school-classes/$id'
+      path: '/$id'
+      fullPath: '/school-classes/$id'
+      preLoaderRoute: typeof SchoolClassesIdRouteImport
+      parentRoute: typeof SchoolClassesRoute
+    }
     '/modules/$id': {
       id: '/modules/$id'
       path: '/$id'
@@ -343,6 +462,18 @@ const ModulesRouteChildren: ModulesRouteChildren = {
 
 const ModulesRouteWithChildren =
   ModulesRoute._addFileChildren(ModulesRouteChildren)
+
+interface SchoolClassesRouteChildren {
+  SchoolClassesIdRoute: typeof SchoolClassesIdRoute
+}
+
+const SchoolClassesRouteChildren: SchoolClassesRouteChildren = {
+  SchoolClassesIdRoute: SchoolClassesIdRoute,
+}
+
+const SchoolClassesRouteWithChildren = SchoolClassesRoute._addFileChildren(
+  SchoolClassesRouteChildren,
+)
 
 interface StudentsRouteChildren {
   StudentsIdRoute: typeof StudentsIdRoute
@@ -368,6 +499,11 @@ const rootRouteChildren: RootRouteChildren = {
   ModulesRoute: ModulesRouteWithChildren,
   PortalRoute: PortalRoute,
   ProgressReportsRoute: ProgressReportsRoute,
+  SchoolAttendanceRoute: SchoolAttendanceRoute,
+  SchoolClassesRoute: SchoolClassesRouteWithChildren,
+  SchoolDiaryRoute: SchoolDiaryRoute,
+  SchoolPtmRoute: SchoolPtmRoute,
+  SchoolSchemeRoute: SchoolSchemeRoute,
   StudentsRoute: StudentsRouteWithChildren,
   StudentPortalTokenRoute: StudentPortalTokenRoute,
 }

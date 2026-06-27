@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Outlet, Link, createRootRouteWithContext, useRouter } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth";
+import { ModeProvider } from "@/lib/mode";
 
 function NotFoundComponent() {
   return (
@@ -67,7 +68,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Outlet />
+        <ModeProvider>
+          <Outlet />
+        </ModeProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
